@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import './AuthPanel.css';
 
 // Shown in the header. Renders nothing when Supabase isn't configured, so the
@@ -71,74 +72,76 @@ export function AuthPanel({ auth }) {
         Sign in
       </button>
 
-      {isOpen && (
-        <div className="auth-overlay" role="dialog" aria-modal="true">
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <button
-              type="button"
-              className="auth-form-close pop-btn"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close"
-            >
-              ✕
-            </button>
-
-            <div className="auth-tabs">
+      {isOpen &&
+        createPortal(
+          <div className="auth-overlay" role="dialog" aria-modal="true">
+            <form className="auth-form" onSubmit={handleSubmit}>
               <button
                 type="button"
-                className={`auth-tab ${mode === 'signin' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setMode('signin');
-                  setError('');
-                  setStatus('');
-                }}
+                className="auth-form-close pop-btn"
+                onClick={() => setIsOpen(false)}
+                aria-label="Close"
               >
-                Sign in
+                ✕
               </button>
-              <button
-                type="button"
-                className={`auth-tab ${mode === 'signup' ? 'is-active' : ''}`}
-                onClick={() => {
-                  setMode('signup');
-                  setError('');
-                  setStatus('');
-                }}
-              >
-                Create account
+
+              <div className="auth-tabs">
+                <button
+                  type="button"
+                  className={`auth-tab ${mode === 'signin' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setMode('signin');
+                    setError('');
+                    setStatus('');
+                  }}
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  className={`auth-tab ${mode === 'signup' ? 'is-active' : ''}`}
+                  onClick={() => {
+                    setMode('signup');
+                    setError('');
+                    setStatus('');
+                  }}
+                >
+                  Create account
+                </button>
+              </div>
+
+              <label className="auth-field">
+                <span>Email</span>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </label>
+
+              <label className="auth-field">
+                <span>Password</span>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={6}
+                  required
+                />
+              </label>
+
+              {error && <p className="auth-error">{error}</p>}
+              {status && <p className="auth-status">{status}</p>}
+
+              <button type="submit" className="auth-submit pop-btn" disabled={busy}>
+                {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
               </button>
-            </div>
-
-            <label className="auth-field">
-              <span>Email</span>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoFocus
-              />
-            </label>
-
-            <label className="auth-field">
-              <span>Password</span>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                minLength={6}
-                required
-              />
-            </label>
-
-            {error && <p className="auth-error">{error}</p>}
-            {status && <p className="auth-status">{status}</p>}
-
-            <button type="submit" className="auth-submit pop-btn" disabled={busy}>
-              {busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : 'Sign in'}
-            </button>
-          </form>
-        </div>
-      )}
+            </form>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

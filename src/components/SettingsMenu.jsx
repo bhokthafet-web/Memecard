@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useOnlineStatus } from '../hooks/useOnlineStatus';
 import './CardForm.css';
 import './SettingsMenu.css';
@@ -23,60 +24,62 @@ export function SettingsMenu({ auth }) {
         <span className="settings-gear-icon" aria-hidden="true">⚙️</span>
       </button>
 
-      {isOpen && (
-        <div className="card-form-overlay" role="dialog" aria-modal="true">
-          <div className="card-form settings-panel">
-            <button
-              type="button"
-              className="card-form-close pop-btn"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close settings"
-            >
-              ✕
-            </button>
+      {isOpen &&
+        createPortal(
+          <div className="card-form-overlay" role="dialog" aria-modal="true">
+            <div className="card-form settings-panel">
+              <button
+                type="button"
+                className="card-form-close pop-btn"
+                onClick={() => setIsOpen(false)}
+                aria-label="Close settings"
+              >
+                ✕
+              </button>
 
-            <h2 className="card-form-heading">Settings</h2>
+              <h2 className="card-form-heading">Settings</h2>
 
-            <section className="settings-section">
-              <h3>🔊 Audio output</h3>
-              <p>Play audio through your device's currently selected speaker.</p>
-              <p className="settings-strong">Bluetooth speaker?</p>
-              <p>
-                Connect it from your device's Bluetooth settings (not from inside this
-                app — a website can't pair Bluetooth audio devices itself), then press
-                Play as usual.
-              </p>
-            </section>
+              <section className="settings-section">
+                <h3>🔊 Audio output</h3>
+                <p>Play audio through your device's currently selected speaker.</p>
+                <p className="settings-strong">Bluetooth speaker?</p>
+                <p>
+                  Connect it from your device's Bluetooth settings (not from inside this
+                  app — a website can't pair Bluetooth audio devices itself), then press
+                  Play as usual.
+                </p>
+              </section>
 
-            <section className="settings-section">
-              <h3>📶 Connection</h3>
-              <p>
-                Status:{' '}
-                <span className={isOnline ? 'settings-status-ok' : 'settings-status-bad'}>
-                  {isOnline ? 'Online' : 'Offline'}
-                </span>
-              </p>
-              <p>Works over Wi-Fi or a mobile hotspot — either connects the same way.</p>
-            </section>
+              <section className="settings-section">
+                <h3>📶 Connection</h3>
+                <p>
+                  Status:{' '}
+                  <span className={isOnline ? 'settings-status-ok' : 'settings-status-bad'}>
+                    {isOnline ? 'Online' : 'Offline'}
+                  </span>
+                </p>
+                <p>Works over Wi-Fi or a mobile hotspot — either connects the same way.</p>
+              </section>
 
-            <section className="settings-section">
-              <h3>👤 Account</h3>
-              {auth.enabled ? (
-                auth.user ? (
-                  <p>
-                    Signed in as <strong>{auth.profile?.email || auth.user.email}</strong>
-                    {auth.isAdmin ? ' — admin' : ''}. Your wall syncs across devices.
-                  </p>
+              <section className="settings-section">
+                <h3>👤 Account</h3>
+                {auth.enabled ? (
+                  auth.user ? (
+                    <p>
+                      Signed in as <strong>{auth.profile?.email || auth.user.email}</strong>
+                      {auth.isAdmin ? ' — admin' : ''}. Your wall syncs across devices.
+                    </p>
+                  ) : (
+                    <p>Not signed in. Your wall stays on this device only until you sign in.</p>
+                  )
                 ) : (
-                  <p>Not signed in. Your wall stays on this device only until you sign in.</p>
-                )
-              ) : (
-                <p>Accounts aren't set up for this deployment — everything stays on this device.</p>
-              )}
-            </section>
-          </div>
-        </div>
-      )}
+                  <p>Accounts aren't set up for this deployment — everything stays on this device.</p>
+                )}
+              </section>
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

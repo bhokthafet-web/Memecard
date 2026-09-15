@@ -62,9 +62,3 @@
   font-weight: 700;
   color: var(--color-primary);
 }
-
-.card-grid-help {
-  display: flex;
-  justify-content: center;
-  padding: 0 16px 16px;
-}
