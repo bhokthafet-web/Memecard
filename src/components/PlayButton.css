@@ -16,7 +16,7 @@
   max-width: 320px;
   padding: 10px 12px;
   border-radius: var(--radius-full);
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: #fff;
   font-size: 0.82rem;
   font-weight: 700;
@@ -24,17 +24,20 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  box-shadow: var(--shadow-glow);
 }
 
 .play-button.is-playing {
   --pop-shadow: #0e9c76;
   background: var(--color-success);
+  box-shadow: 0 8px 28px -6px rgba(20, 184, 138, 0.45);
 }
 
 .play-button.is-error {
-  --pop-shadow: #d8d8de;
-  background: #eeeef3;
+  --pop-shadow: rgba(255, 255, 255, 0.4);
+  background: rgba(238, 238, 243, 0.85);
   color: var(--color-text-secondary);
+  box-shadow: none;
 }
 
 .play-button-icon {
@@ -63,7 +66,7 @@
   max-width: 320px;
   height: 3px;
   border-radius: var(--radius-full);
-  background: var(--color-primary-soft);
+  background: rgba(109, 90, 239, 0.15);
   overflow: hidden;
 }
 
@@ -71,7 +74,7 @@
   height: 100%;
   width: 100%;
   transform-origin: left;
-  background: var(--color-primary);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
   transform: scaleX(0);
   transition: transform 0.1s linear;
 }

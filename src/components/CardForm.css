@@ -1,8 +1,9 @@
 .card-form-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(20, 20, 35, 0.5);
-  backdrop-filter: blur(2px);
+  background: rgba(20, 16, 45, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,7 +18,10 @@
   max-width: 360px;
   max-height: 90vh;
   overflow-y: auto;
-  background: var(--color-surface);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 24px 20px 20px;
   display: flex;
@@ -45,14 +49,15 @@
 }
 
 .card-form-close {
-  --pop-shadow: #d8d8de;
+  --pop-shadow: rgba(255, 255, 255, 0.5);
   position: absolute;
   top: 14px;
   right: 14px;
   width: 30px;
   height: 30px;
   border-radius: var(--radius-full);
-  background: #f2f2f6;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--color-border);
   font-size: 0.85rem;
 }
 
@@ -83,16 +88,16 @@
   font: inherit;
   font-weight: 400;
   padding: 10px 12px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(109, 90, 239, 0.18);
   border-radius: var(--radius-sm);
   outline: none;
-  background: #fbfbfd;
+  background: rgba(255, 255, 255, 0.5);
   transition: border-color 0.12s ease, background 0.12s ease;
 }
 
 .card-form-field input[type='text']:focus {
   border-color: var(--color-primary);
-  background: #fff;
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .card-form-field input[type='file'] {
@@ -139,7 +144,7 @@
 
 .photo-upload-btn {
   --pop-shadow: var(--color-primary-dark);
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: #fff;
   font-weight: 600;
   font-size: 0.78rem;
@@ -174,12 +179,12 @@
 }
 
 .emoji-choice {
-  --pop-shadow: #d9d5ec;
+  --pop-shadow: rgba(255, 255, 255, 0.5);
   font-size: 1.15rem;
   padding: 6px 0;
   border-radius: var(--radius-sm);
   border: 1px solid transparent;
-  background: #f7f7fb;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .emoji-choice.is-selected {
@@ -192,7 +197,8 @@
   margin: 0;
   font-size: 0.74rem;
   color: var(--color-text-secondary);
-  background: #f7f7fb;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 8px 10px;
   line-height: 1.35;
@@ -220,13 +226,15 @@
 }
 
 .card-form-cancel {
-  --pop-shadow: #d8d8de;
-  background: #f2f2f6;
+  --pop-shadow: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--color-border);
   color: var(--color-text);
 }
 
 .card-form-save {
   --pop-shadow: var(--color-primary-dark);
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: #fff;
+  box-shadow: var(--shadow-glow);
 }

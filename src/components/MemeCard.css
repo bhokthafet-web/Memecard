@@ -4,7 +4,9 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  background: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 18px 14px 16px;
@@ -15,7 +17,7 @@
 }
 
 .meme-card:hover {
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
 /* A soft highlight that follows the cursor (set via --glare-x/--glare-y in
@@ -48,16 +50,19 @@
 }
 
 .meme-card-action {
-  --pop-shadow: #e2e2ea;
+  --pop-shadow: rgba(255, 255, 255, 0.5);
   width: 26px;
   height: 26px;
   border-radius: var(--radius-full);
-  background: #f4f4f8;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   font-size: 0.72rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 .meme-card-action:hover {
@@ -66,7 +71,7 @@
 
 .meme-card-action-danger {
   --pop-shadow: #e5b3b1;
-  background: #fdecec;
+  background: rgba(253, 236, 236, 0.85);
 }
 
 .meme-card-image {

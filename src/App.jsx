@@ -82,9 +82,9 @@ export default function App() {
         ? { ...category, ...globalCategoryOverrides[category.id] }
         : category;
 
-      const sharedCards = [...category.cards, ...(globalCards[category.id] || [])].map((card) =>
-        globalCardOverrides[card.id] ? { ...card, ...globalCardOverrides[card.id] } : card,
-      );
+      const sharedCards = [...category.cards, ...(globalCards[category.id] || [])]
+        .map((card) => (globalCardOverrides[card.id] ? { ...card, ...globalCardOverrides[card.id] } : card))
+        .filter((card) => !card.deleted);
 
       return {
         ...merged,
@@ -172,12 +172,26 @@ export default function App() {
       } else {
         setLocalCustomCards(deleteCustomCard(activeCategoryId, card.id));
       }
-    } else if (card.isGlobal && auth.user && auth.isAdmin) {
-      // Admin-created shared content — deletable, unlike a real built-in card.
+      return;
+    }
+
+    if (!auth.user || !auth.isAdmin) return; // shared content is admin-only to remove
+
+    if (card.isGlobal) {
+      // Admin-created shared content — a real row, so a real delete.
       await deleteGlobalCard(card.id);
       setGlobalCards((prev) => ({
         ...prev,
         [activeCategoryId]: (prev[activeCategoryId] || []).filter((c) => c.id !== card.id),
+      }));
+    } else {
+      // A real built-in card only exists in source (src/data/content.js) —
+      // there's no row to delete, so "delete" is a global override that
+      // hides it for everyone instead.
+      await saveGlobalOverride(card.id, { deleted: true }, auth.user.id);
+      setGlobalCardOverrides((prev) => ({
+        ...prev,
+        [card.id]: { ...(prev[card.id] || {}), deleted: true },
       }));
     }
   };

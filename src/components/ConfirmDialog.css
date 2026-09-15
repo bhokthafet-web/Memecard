@@ -1,8 +1,9 @@
 .confirm-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(20, 20, 35, 0.5);
-  backdrop-filter: blur(2px);
+  background: rgba(20, 16, 45, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,7 +15,10 @@
 .confirm-dialog {
   width: 100%;
   max-width: 300px;
-  background: var(--color-surface);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 22px 20px 18px;
   box-shadow: var(--shadow-lg);
@@ -50,8 +54,9 @@
 }
 
 .confirm-cancel {
-  --pop-shadow: #d8d8de;
-  background: #f2f2f6;
+  --pop-shadow: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--color-border);
   color: var(--color-text);
 }
 
@@ -59,4 +64,5 @@
   --pop-shadow: #b23230;
   background: var(--color-danger);
   color: #fff;
+  box-shadow: 0 8px 24px -6px rgba(224, 67, 63, 0.5);
 }

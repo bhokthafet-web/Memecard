@@ -1,24 +1,33 @@
 :root {
-  --color-bg: #f6f6fb;
-  --color-surface: #ffffff;
-  --color-primary: #5b4fe8;
-  --color-primary-dark: #4638c4;
-  --color-primary-soft: #f0eefd;
+  --color-bg: #f0edfb;
+  --color-primary: #6d5aef;
+  --color-primary-dark: #4f3fd6;
+  --color-accent: #ec4899;
+  --color-primary-soft: rgba(109, 90, 239, 0.12);
   --color-success: #14b88a;
   --color-danger: #e0433f;
   --color-text: #1c1f2b;
-  --color-text-secondary: #767c8c;
-  --color-border: #ececf2;
+  --color-text-secondary: #6b6f85;
+  --color-border: rgba(255, 255, 255, 0.5);
+
+  /* Glass surfaces: translucent + blurred so the colorful backdrop shows
+     through. --glass-bg-strong is used where legibility matters more
+     (modals, forms) and needs less see-through. */
+  --glass-bg: rgba(255, 255, 255, 0.5);
+  --glass-bg-strong: rgba(255, 255, 255, 0.72);
+  --glass-blur: 20px;
+  --color-surface: var(--glass-bg-strong);
 
   --radius-sm: 10px;
   --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-lg: 22px;
   --radius-full: 999px;
 
-  --shadow-xs: 0 1px 2px rgba(20, 20, 43, 0.05);
-  --shadow-sm: 0 2px 8px -2px rgba(20, 20, 43, 0.08);
-  --shadow-md: 0 8px 20px -6px rgba(20, 20, 43, 0.12);
-  --shadow-lg: 0 20px 48px -16px rgba(20, 20, 43, 0.28);
+  --shadow-xs: 0 1px 2px rgba(31, 21, 92, 0.06);
+  --shadow-sm: 0 4px 16px -4px rgba(31, 21, 92, 0.12);
+  --shadow-md: 0 10px 28px -8px rgba(31, 21, 92, 0.18);
+  --shadow-lg: 0 24px 56px -16px rgba(31, 21, 92, 0.35);
+  --shadow-glow: 0 8px 28px -6px rgba(109, 90, 239, 0.4);
 }
 
 * {
@@ -32,6 +41,7 @@ body {
 }
 
 body {
+  position: relative;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
     sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -39,6 +49,22 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   letter-spacing: -0.01em;
+  min-height: 100dvh;
+}
+
+/* The colorful "aurora" backdrop every glass surface shows through. Fixed
+   and behind everything, independent of scroll. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(109, 90, 239, 0.45), transparent 45%),
+    radial-gradient(circle at 85% 10%, rgba(236, 72, 153, 0.4), transparent 45%),
+    radial-gradient(circle at 75% 75%, rgba(59, 130, 246, 0.35), transparent 50%),
+    radial-gradient(circle at 10% 85%, rgba(20, 184, 138, 0.3), transparent 45%),
+    var(--color-bg);
 }
 
 button {

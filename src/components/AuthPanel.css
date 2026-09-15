@@ -18,7 +18,7 @@
 }
 
 .auth-panel-badge {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: #fff;
   font-size: 0.6rem;
   font-weight: 800;
@@ -32,26 +32,30 @@
 .auth-panel-signin,
 .auth-panel-signout {
   --pop-shadow: var(--color-primary-dark);
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: #fff;
   font-weight: 700;
   font-size: 0.78rem;
   padding: 7px 14px;
   border-radius: var(--radius-full);
   white-space: nowrap;
+  box-shadow: var(--shadow-glow);
 }
 
 .auth-panel-signout {
-  --pop-shadow: #d8d8de;
-  background: #f2f2f6;
+  --pop-shadow: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--color-border);
   color: var(--color-text);
+  box-shadow: none;
 }
 
 .auth-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(20, 20, 35, 0.5);
-  backdrop-filter: blur(2px);
+  background: rgba(20, 16, 45, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,7 +68,10 @@
   position: relative;
   width: 100%;
   max-width: 320px;
-  background: var(--color-surface);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: 24px 20px 20px;
   display: flex;
@@ -91,20 +98,22 @@
 }
 
 .auth-form-close {
-  --pop-shadow: #d8d8de;
+  --pop-shadow: rgba(255, 255, 255, 0.5);
   position: absolute;
   top: 14px;
   right: 14px;
   width: 30px;
   height: 30px;
   border-radius: var(--radius-full);
-  background: #f2f2f6;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid var(--color-border);
   font-size: 0.85rem;
 }
 
 .auth-tabs {
   display: flex;
-  background: #f2f2f6;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   padding: 3px;
   gap: 3px;
@@ -123,8 +132,8 @@
 }
 
 .auth-tab.is-active {
-  background: #fff;
-  color: var(--color-primary);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-primary-dark);
   box-shadow: var(--shadow-xs);
 }
 
@@ -141,15 +150,15 @@
   font: inherit;
   font-weight: 400;
   padding: 10px 12px;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(109, 90, 239, 0.18);
   border-radius: var(--radius-sm);
   outline: none;
-  background: #fbfbfd;
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .auth-field input:focus {
   border-color: var(--color-primary);
-  background: #fff;
+  background: rgba(255, 255, 255, 0.85);
 }
 
 .auth-error {
@@ -166,10 +175,11 @@
 
 .auth-submit {
   --pop-shadow: var(--color-primary-dark);
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: #fff;
   font-weight: 700;
   font-size: 0.85rem;
   padding: 10px;
   border-radius: var(--radius-full);
+  box-shadow: var(--shadow-glow);
 }

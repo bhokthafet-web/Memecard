@@ -12,7 +12,7 @@ export function CardGrid({ category, isAdmin, onAddCard, onEditCard, onCopyToWal
             card={card}
             canEdit={isAdmin || Boolean(card.custom)}
             canAddToWall={!isAdmin && !card.custom}
-            canDelete={Boolean(card.custom) || (isAdmin && Boolean(card.isGlobal))}
+            canDelete={Boolean(card.custom) || isAdmin}
             onEdit={onEditCard}
             onAddToWall={onCopyToWall}
             onDelete={onDeleteCard}

@@ -11,9 +11,11 @@
 }
 
 .category-tab {
-  --pop-shadow: #e2e0f0;
+  --pop-shadow: rgba(255, 255, 255, 0.5);
   flex-shrink: 0;
-  background: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--color-border);
   color: var(--color-text-secondary);
   font-weight: 600;
@@ -25,15 +27,16 @@
 
 .category-tab.is-active {
   --pop-shadow: var(--color-primary-dark);
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   border-color: transparent;
   color: #fff;
   font-weight: 700;
+  box-shadow: var(--shadow-glow);
 }
 
 .category-tab-add {
-  --pop-shadow: #ddd8f5;
-  background: var(--color-primary-soft);
-  border: 1px dashed #c9c2f0;
-  color: var(--color-primary);
+  --pop-shadow: rgba(255, 255, 255, 0.5);
+  background: var(--glass-bg);
+  border: 1px dashed rgba(109, 90, 239, 0.45);
+  color: var(--color-primary-dark);
 }
