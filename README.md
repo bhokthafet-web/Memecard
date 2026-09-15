@@ -106,6 +106,34 @@ See the "Deploy" section above for where these two values need to live for
 GitHub Pages (repo secrets) vs. Netlify (its own dashboard) — either way, a
 local `.env` only affects `npm run dev`/`npm run build` on your machine.
 
+## Data retention: auto-delete inactive accounts (optional, Supabase only)
+
+**This is a real, irreversible policy, not a UI toggle — read this whole
+section before touching it.** It permanently deletes a user's account
+(profile, personal wall cards, everything) if they haven't signed in for 30
+days. There is no undo. Admin accounts are excluded by default.
+
+Nothing here runs unless you deliberately schedule it — applying
+`supabase/data-retention.sql` only creates the deletion function; it does
+not delete anyone or start any schedule by itself.
+
+1. Run `supabase/data-retention.sql` in the SQL Editor (safe to re-run; it
+   only adjusts some foreign keys and (re)creates the function).
+2. **Preview who would actually be deleted** before scheduling anything —
+   the exact query is in a comment near the bottom of that file. Run it and
+   look at the list.
+3. Enable the `pg_cron` extension once: **Database → Extensions** in the
+   Supabase dashboard.
+4. Only then run the `cron.schedule(...)` statement (also in that file's
+   comments) to actually turn on the daily sweep. `cron.unschedule(...)`
+   turns it back off at any time.
+
+What survives: any shared/official content an inactive user created as
+admin (they're excluded from deletion anyway) or, in the rare case someone
+created global content and then went inactive as a non-admin, that content
+stays — the row's `created_by`/`updated_by` just becomes `null` instead of
+the whole card disappearing for everyone.
+
 ## Architecture notes
 
 - **Audio**: standard HTML5 `<audio>` via `src/hooks/useAudioPlayer.js`. Plays
@@ -124,6 +152,9 @@ local `.env` only affects `npm run dev`/`npm run build` on your machine.
 - **Connectivity**: `useOnlineStatus.js` listens for `online`/`offline`
   events (works the same over Wi-Fi or a mobile hotspot) and the app shows a
   friendly offline banner rather than failing silently.
+- **Settings**: the spinning ⚙️ in the header (`SettingsMenu.jsx`) opens a
+  panel consolidating audio/Bluetooth guidance, live connection status, and
+  account status in one place, separate from the primary Sign in button.
 - **Personal cards**: the "+ Add Card" flow stores user-added cards (title,
   description, emoji image, optional uploaded audio) in `localStorage` when
   signed out, or in Supabase when signed in (see "Accounts & per-user cards"

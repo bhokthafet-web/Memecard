@@ -1,0 +1,73 @@
+.settings-gear-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.settings-gear-icon {
+  display: inline-block;
+  font-size: 1rem;
+  line-height: 1;
+  animation: settings-spin 6s linear infinite;
+}
+
+@keyframes settings-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.settings-panel {
+  max-width: 340px;
+}
+
+.settings-section {
+  padding-top: 4px;
+  border-top: 1px solid var(--color-border);
+}
+
+.settings-section:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.settings-section h3 {
+  margin: 0 0 4px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.settings-section p {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.settings-section p:last-child {
+  margin-bottom: 0;
+}
+
+.settings-strong {
+  font-weight: 700;
+  color: var(--color-text) !important;
+}
+
+.settings-status-ok {
+  font-weight: 700;
+  color: var(--color-success);
+}
+
+.settings-status-bad {
+  font-weight: 700;
+  color: var(--color-danger);
+}

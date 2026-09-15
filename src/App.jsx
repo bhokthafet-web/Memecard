@@ -25,6 +25,7 @@ import { CardForm } from './components/CardForm';
 import { OfflineBanner } from './components/OfflineBanner';
 import { AuthPanel } from './components/AuthPanel';
 import { ConfirmDialog } from './components/ConfirmDialog';
+import { SettingsMenu } from './components/SettingsMenu';
 import './App.css';
 
 // Shared/official content (built-in + anything admins create) can only ever
@@ -226,7 +227,10 @@ export default function App() {
     <div className="app">
       <header className="app-header">
         <h1 className="app-title">Memecard</h1>
-        <AuthPanel auth={auth} />
+        <div className="app-header-actions">
+          <SettingsMenu auth={auth} />
+          <AuthPanel auth={auth} />
+        </div>
       </header>
 
       {!isOnline && <OfflineBanner />}
