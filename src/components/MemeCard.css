@@ -76,13 +76,13 @@
 
 .meme-card-image {
   position: relative;
-  width: 96px;
-  height: 96px;
+  width: 120px;
+  height: 120px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.7rem;
+  font-size: 3.4rem;
   overflow: hidden;
   box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.6), var(--shadow-sm);
   transform: translateZ(20px);
