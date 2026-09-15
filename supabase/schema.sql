@@ -1,5 +1,7 @@
 -- Memecard Supabase schema.
--- Run this once in your project's SQL Editor (Supabase dashboard → SQL Editor → New query).
+-- Run this in your project's SQL Editor (Supabase dashboard → SQL Editor → New query).
+-- Safe to re-run any time you pull in schema changes — every statement drops
+-- its own policy/trigger first, so running it twice is a no-op, not an error.
 
 -- ---------------------------------------------------------------------------
 -- profiles: one row per signed-up user, holds their role ('user' or 'admin').
@@ -14,6 +16,7 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+drop policy if exists "profiles: read own row" on public.profiles;
 create policy "profiles: read own row"
   on public.profiles for select
   using (auth.uid() = id);
@@ -54,10 +57,12 @@ create table if not exists public.global_card_overrides (
 
 alter table public.global_card_overrides enable row level security;
 
+drop policy if exists "global overrides: readable by everyone" on public.global_card_overrides;
 create policy "global overrides: readable by everyone"
   on public.global_card_overrides for select
   using (true);
 
+drop policy if exists "global overrides: admins can write" on public.global_card_overrides;
 create policy "global overrides: admins can write"
   on public.global_card_overrides for all
   using (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'))
@@ -81,6 +86,7 @@ create table if not exists public.user_custom_cards (
 
 alter table public.user_custom_cards enable row level security;
 
+drop policy if exists "user cards: owner full access" on public.user_custom_cards;
 create policy "user cards: owner full access"
   on public.user_custom_cards for all
   using (auth.uid() = user_id)
@@ -101,6 +107,7 @@ create table if not exists public.user_card_overrides (
 
 alter table public.user_card_overrides enable row level security;
 
+drop policy if exists "user overrides: owner full access" on public.user_card_overrides;
 create policy "user overrides: owner full access"
   on public.user_card_overrides for all
   using (auth.uid() = user_id)
@@ -120,10 +127,12 @@ create table if not exists public.global_category_overrides (
 
 alter table public.global_category_overrides enable row level security;
 
+drop policy if exists "global category overrides: readable by everyone" on public.global_category_overrides;
 create policy "global category overrides: readable by everyone"
   on public.global_category_overrides for select
   using (true);
 
+drop policy if exists "global category overrides: admins can write" on public.global_category_overrides;
 create policy "global category overrides: admins can write"
   on public.global_category_overrides for all
   using (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'))
@@ -139,6 +148,7 @@ create table if not exists public.user_category_overrides (
 
 alter table public.user_category_overrides enable row level security;
 
+drop policy if exists "user category overrides: owner full access" on public.user_category_overrides;
 create policy "user category overrides: owner full access"
   on public.user_category_overrides for all
   using (auth.uid() = user_id)
@@ -168,10 +178,12 @@ create table if not exists public.global_categories (
 
 alter table public.global_categories enable row level security;
 
+drop policy if exists "global categories: readable by everyone" on public.global_categories;
 create policy "global categories: readable by everyone"
   on public.global_categories for select
   using (true);
 
+drop policy if exists "global categories: admins can write" on public.global_categories;
 create policy "global categories: admins can write"
   on public.global_categories for all
   using (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'))
@@ -191,10 +203,12 @@ create table if not exists public.global_cards (
 
 alter table public.global_cards enable row level security;
 
+drop policy if exists "global cards: readable by everyone" on public.global_cards;
 create policy "global cards: readable by everyone"
   on public.global_cards for select
   using (true);
 
+drop policy if exists "global cards: admins can write" on public.global_cards;
 create policy "global cards: admins can write"
   on public.global_cards for all
   using (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'))
