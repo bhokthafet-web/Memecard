@@ -1,7 +1,12 @@
 // Built-in demo content. Each card's `audio` points to a real file under /public/audio.
 // One card in "French Basics" intentionally has a broken audio path to exercise the
 // "missing or invalid audio" handling in <PlayButton>.
-export const CATEGORIES = [
+//
+// Paths below are relative (no leading slash) and get resolved against Vite's
+// configured base URL at the bottom of this file — required because this app
+// is deployed under a subpath (e.g. github.io/Memecard/), so a hardcoded
+// root-relative "/audio/..." 404s in production even though it works in dev.
+const RAW_CATEGORIES = [
   {
     id: 'french-basics',
     title: 'French Basics',
@@ -14,7 +19,7 @@ export const CATEGORIES = [
         description: 'Hello / Good day',
         image: '👋',
         color: '#FDE68A',
-        audio: '/audio/bonjour.mp3',
+        audio: 'audio/bonjour.mp3',
       },
       {
         id: 'fr-merci',
@@ -22,7 +27,7 @@ export const CATEGORIES = [
         description: 'Thank you',
         image: '🙏',
         color: '#BFDBFE',
-        audio: '/audio/merci.mp3',
+        audio: 'audio/merci.mp3',
       },
       {
         id: 'fr-au-revoir',
@@ -30,7 +35,7 @@ export const CATEGORIES = [
         description: 'Goodbye',
         image: '👋',
         color: '#FBCFE8',
-        audio: '/audio/au-revoir.mp3',
+        audio: 'audio/au-revoir.mp3',
       },
       {
         id: 'fr-sil-vous-plait',
@@ -38,7 +43,7 @@ export const CATEGORIES = [
         description: 'Please',
         image: '🤝',
         color: '#C7D2FE',
-        audio: '/audio/sil-vous-plait.mp3',
+        audio: 'audio/sil-vous-plait.mp3',
       },
       {
         id: 'fr-broken-demo',
@@ -46,7 +51,7 @@ export const CATEGORIES = [
         description: 'Good evening (demo: audio file is missing on purpose)',
         image: '🌙',
         color: '#DDD6FE',
-        audio: '/audio/does-not-exist.mp3',
+        audio: 'audio/does-not-exist.mp3',
       },
     ],
   },
@@ -62,7 +67,7 @@ export const CATEGORIES = [
         description: 'Hello',
         image: '👋',
         color: '#FCD34D',
-        audio: '/audio/hola.mp3',
+        audio: 'audio/hola.mp3',
       },
       {
         id: 'es-gracias',
@@ -70,7 +75,7 @@ export const CATEGORIES = [
         description: 'Thank you',
         image: '🙏',
         color: '#A7F3D0',
-        audio: '/audio/gracias.mp3',
+        audio: 'audio/gracias.mp3',
       },
       {
         id: 'es-adios',
@@ -78,7 +83,7 @@ export const CATEGORIES = [
         description: 'Goodbye',
         image: '👋',
         color: '#FCA5A5',
-        audio: '/audio/adios.mp3',
+        audio: 'audio/adios.mp3',
       },
       {
         id: 'es-por-favor',
@@ -86,7 +91,7 @@ export const CATEGORIES = [
         description: 'Please',
         image: '🤝',
         color: '#93C5FD',
-        audio: '/audio/por-favor.mp3',
+        audio: 'audio/por-favor.mp3',
       },
     ],
   },
@@ -102,7 +107,7 @@ export const CATEGORIES = [
         description: 'A friendly greeting',
         image: '👋',
         color: '#BBF7D0',
-        audio: '/audio/hello.mp3',
+        audio: 'audio/hello.mp3',
       },
       {
         id: 'en-thank-you',
@@ -110,7 +115,7 @@ export const CATEGORIES = [
         description: 'Expressing gratitude',
         image: '🙏',
         color: '#FDE68A',
-        audio: '/audio/thank-you.mp3',
+        audio: 'audio/thank-you.mp3',
       },
       {
         id: 'en-goodbye',
@@ -118,8 +123,16 @@ export const CATEGORIES = [
         description: 'Parting words',
         image: '👋',
         color: '#E9D5FF',
-        audio: '/audio/goodbye.mp3',
+        audio: 'audio/goodbye.mp3',
       },
     ],
   },
 ];
+
+export const CATEGORIES = RAW_CATEGORIES.map((category) => ({
+  ...category,
+  cards: category.cards.map((card) => ({
+    ...card,
+    audio: `${import.meta.env.BASE_URL}${card.audio}`,
+  })),
+}));
