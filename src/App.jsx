@@ -12,6 +12,7 @@ import {
   saveGlobalCategoryOverride,
   fetchGlobalCategories,
   insertGlobalCategory,
+  deleteGlobalCategory,
   fetchGlobalCards,
   insertGlobalCard,
   deleteGlobalCard,
@@ -56,6 +57,7 @@ export default function App() {
   const [isEditingCategory, setIsEditingCategory] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [cardPendingDelete, setCardPendingDelete] = useState(null);
+  const [categoryPendingDelete, setCategoryPendingDelete] = useState(null);
   const [globalLoadError, setGlobalLoadError] = useState(false);
   const [globalLoadAttempt, setGlobalLoadAttempt] = useState(0);
 
@@ -95,20 +97,22 @@ export default function App() {
   const categories = useMemo(() => {
     const allCategories = [...CATEGORIES, ...globalCategories];
 
-    return allCategories.map((category) => {
-      const merged = globalCategoryOverrides[category.id]
-        ? { ...category, ...globalCategoryOverrides[category.id] }
-        : category;
+    return allCategories
+      .map((category) => {
+        const merged = globalCategoryOverrides[category.id]
+          ? { ...category, ...globalCategoryOverrides[category.id] }
+          : category;
 
-      const sharedCards = [...category.cards, ...(globalCards[category.id] || [])]
-        .map((card) => (globalCardOverrides[card.id] ? { ...card, ...globalCardOverrides[card.id] } : card))
-        .filter((card) => !card.deleted);
+        const sharedCards = [...category.cards, ...(globalCards[category.id] || [])]
+          .map((card) => (globalCardOverrides[card.id] ? { ...card, ...globalCardOverrides[card.id] } : card))
+          .filter((card) => !card.deleted);
 
-      return {
-        ...merged,
-        cards: [...sharedCards, ...(wallCards[category.id] || [])],
-      };
-    });
+        return {
+          ...merged,
+          cards: [...sharedCards, ...(wallCards[category.id] || [])],
+        };
+      })
+      .filter((category) => !category.deleted);
   }, [globalCategories, globalCategoryOverrides, globalCards, globalCardOverrides, wallCards]);
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId) || categories[0] || null;
@@ -214,6 +218,37 @@ export default function App() {
     }
   };
 
+  const performDeleteCategory = async (category) => {
+    if (!auth.user || !auth.isAdmin) return; // categories are admin-only to remove
+
+    if (category.isGlobal) {
+      // Admin-created category — a real row (and its cards), so a real delete.
+      await deleteGlobalCategory(category.id);
+      setGlobalCategories((prev) => prev.filter((c) => c.id !== category.id));
+      setGlobalCards((prev) => {
+        const next = { ...prev };
+        delete next[category.id];
+        return next;
+      });
+    } else {
+      // A real built-in category only exists in source — hide it for
+      // everyone via an override instead of trying to delete it.
+      await saveGlobalCategoryOverride(category.id, { deleted: true }, auth.user.id);
+      setGlobalCategoryOverrides((prev) => ({
+        ...prev,
+        [category.id]: { ...(prev[category.id] || {}), deleted: true },
+      }));
+    }
+
+    // Don't leave activeCategoryId pointing at a category that just
+    // disappeared — every handler that keys off it (add card, etc.) would
+    // silently write into a category nothing can see anymore.
+    if (activeCategoryId === category.id) {
+      const fallback = categories.find((c) => c.id !== category.id);
+      setActiveCategoryId(fallback ? fallback.id : null);
+    }
+  };
+
   const handleSaveCategoryEdit = async (patch) => {
     if (!auth.user || !auth.isAdmin) return; // categories are admin-only to edit
     await saveGlobalCategoryOverride(activeCategoryId, patch, auth.user.id);
@@ -279,14 +314,26 @@ export default function App() {
             <div className="category-header-text">
               <h2>{activeCategory.title}</h2>
               {auth.isAdmin && (
-                <button
-                  type="button"
-                  className="category-edit-btn pop-btn"
-                  onClick={() => setIsEditingCategory(true)}
-                  aria-label={`Edit ${activeCategory.title}`}
-                >
-                  ✏️
-                </button>
+                <>
+                  <button
+                    type="button"
+                    className="category-edit-btn pop-btn"
+                    onClick={() => setIsEditingCategory(true)}
+                    aria-label={`Edit ${activeCategory.title}`}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    type="button"
+                    className="category-edit-btn category-delete-btn pop-btn"
+                    onClick={() => setCategoryPendingDelete(activeCategory)}
+                    aria-label={`Delete ${activeCategory.title}`}
+                    disabled={categories.length <= 1}
+                    title={categories.length <= 1 ? "Can't delete the only remaining category" : 'Delete category'}
+                  >
+                    🗑️
+                  </button>
+                </>
               )}
             </div>
             {activeCategory.description && (
@@ -357,6 +404,22 @@ export default function App() {
           onConfirm={async () => {
             await performDeleteCard(cardPendingDelete);
             setCardPendingDelete(null);
+          }}
+        />
+      )}
+
+      {categoryPendingDelete && (
+        <ConfirmDialog
+          title={`Delete "${categoryPendingDelete.title}"?`}
+          body={
+            categoryPendingDelete.isGlobal
+              ? "This removes the category and every card in it, for every visitor. This can't be undone."
+              : "You are an admin: this removes the category (and every card in it) for every visitor. This can't be undone."
+          }
+          onCancel={() => setCategoryPendingDelete(null)}
+          onConfirm={async () => {
+            await performDeleteCategory(categoryPendingDelete);
+            setCategoryPendingDelete(null);
           }}
         />
       )}

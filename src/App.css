@@ -70,6 +70,15 @@
   opacity: 0.9;
 }
 
+.category-delete-btn {
+  --pop-shadow: #e5b3b1;
+  background: rgba(253, 236, 236, 0.85);
+}
+
+.category-delete-btn:disabled {
+  opacity: 0.4;
+}
+
 .category-header-desc {
   margin: 2px 0 0;
   font-size: 0.8rem;

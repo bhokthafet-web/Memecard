@@ -121,6 +121,8 @@ export async function deleteUserCustomCard(userId, cardId) {
 
 // Admin-created "official" content — new categories/cards that show up for
 // every visitor, as opposed to one user's private additions above.
+// `isGlobal` marks a category as admin-deletable, unlike a real built-in
+// category which only lives in static source (src/data/content.js).
 export async function fetchGlobalCategories() {
   const { data, error } = await supabase
     .from('global_categories')
@@ -133,6 +135,7 @@ export async function fetchGlobalCategories() {
     emoji: row.emoji || '🗂️',
     description: row.description || '',
     cards: [],
+    isGlobal: true,
   }));
 }
 
@@ -143,7 +146,30 @@ export async function insertGlobalCategory(userId, { title, emoji, description }
     .select()
     .single();
   if (error) throw error;
-  return { id: data.id, title: data.title, emoji: data.emoji, description: data.description || '', cards: [] };
+  return {
+    id: data.id,
+    title: data.title,
+    emoji: data.emoji,
+    description: data.description || '',
+    cards: [],
+    isGlobal: true,
+  };
+}
+
+// Deletes an admin-created category along with any cards inside it (real
+// rows, so a real cleanup) and any edit history pointing at it.
+export async function deleteGlobalCategory(categoryId) {
+  const { error: cardsError } = await supabase.from('global_cards').delete().eq('category_id', categoryId);
+  if (cardsError) throw cardsError;
+
+  const { error: overrideError } = await supabase
+    .from('global_category_overrides')
+    .delete()
+    .eq('category_id', categoryId);
+  if (overrideError) throw overrideError;
+
+  const { error } = await supabase.from('global_categories').delete().eq('id', categoryId);
+  if (error) throw error;
 }
 
 export async function fetchGlobalCards() {
