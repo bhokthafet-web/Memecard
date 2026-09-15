@@ -203,7 +203,6 @@ export default function App() {
         <>
           <div className="category-header">
             <div className="category-header-text">
-              <span aria-hidden="true">{activeCategory.emoji}</span>
               <h2>{activeCategory.title}</h2>
               {auth.isAdmin && (
                 <button

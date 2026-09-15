@@ -1,17 +1,14 @@
 import { useState } from 'react';
 import './CardForm.css';
 
-const DEFAULT_EMOJI = '🗂️';
-
-// Editing a category's own title/emoji/description — admin-only (see
-// App.jsx). Pass no `category` to create a brand-new one instead (also
-// admin-only — see App.jsx's "+ New" tab). The icon is entirely optional:
-// leave it blank and a generic folder icon is used automatically.
+// Editing a category's own title/description — admin-only (see App.jsx).
+// Pass no `category` to create a brand-new one instead (also admin-only —
+// see App.jsx's "+ New" tab). Categories have no icon: name + description
+// only, kept intentionally simple.
 export function CategoryForm({ category, scopeNote, onCancel, onSave }) {
   const isEditing = Boolean(category);
   const [title, setTitle] = useState(category?.title || '');
   const [description, setDescription] = useState(category?.description || '');
-  const [emoji, setEmoji] = useState(isEditing ? category.emoji || '' : '');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -29,7 +26,6 @@ export function CategoryForm({ category, scopeNote, onCancel, onSave }) {
       await onSave({
         title: trimmed,
         description: description.trim(),
-        emoji: emoji.trim() || DEFAULT_EMOJI,
       });
     } catch (err) {
       setError(err?.message || 'Could not save. Try again.');
@@ -61,17 +57,6 @@ export function CategoryForm({ category, scopeNote, onCancel, onSave }) {
             onChange={(e) => setTitle(e.target.value)}
             placeholder="e.g. Japanese Basics"
             autoFocus
-          />
-        </label>
-
-        <label className="card-form-field">
-          <span>Icon (optional)</span>
-          <input
-            type="text"
-            value={emoji}
-            onChange={(e) => setEmoji(e.target.value)}
-            placeholder={DEFAULT_EMOJI}
-            maxLength={4}
           />
         </label>
 

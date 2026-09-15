@@ -16,7 +16,6 @@ export function CategoryTabs({ categories, activeId, onSelect, canAdd, onAddCate
             className={`category-tab pop-btn ${isActive ? 'is-active' : ''}`}
             onClick={() => onSelect(category.id)}
           >
-            <span aria-hidden="true">{category.emoji}</span>
             {category.title}
           </button>
         );
