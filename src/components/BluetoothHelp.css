@@ -1,0 +1,40 @@
+.bt-help {
+  width: 100%;
+  max-width: 320px;
+  margin-top: 4px;
+}
+
+.bt-help-toggle {
+  width: 100%;
+  background: none;
+  border: none;
+  color: #636e72;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 4px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.bt-help-body {
+  background: #f8f7fc;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 0.82rem;
+  color: #57606f;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.bt-help-body p {
+  margin: 0 0 6px;
+}
+
+.bt-help-body p:last-child {
+  margin-bottom: 0;
+}
+
+.bt-help-question {
+  font-weight: 700;
+  color: #2d3436;
+}
