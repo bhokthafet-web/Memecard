@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CATEGORIES } from './data/content';
-import { loadCustomCards, saveCustomCard, updateCustomCard } from './utils/storage';
+import { loadCustomCards, saveCustomCard, updateCustomCard, deleteCustomCard } from './utils/storage';
 import {
   fetchGlobalOverrides,
   fetchUserCustomCards,
   insertUserCustomCard,
   updateUserCustomCard,
+  deleteUserCustomCard,
   saveGlobalOverride,
   fetchGlobalCategoryOverrides,
   saveGlobalCategoryOverride,
@@ -13,6 +14,7 @@ import {
   insertGlobalCategory,
   fetchGlobalCards,
   insertGlobalCard,
+  deleteGlobalCard,
 } from './utils/cloudStorage';
 import { useAuth } from './hooks/useAuth';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
@@ -22,6 +24,7 @@ import { CardGrid } from './components/CardGrid';
 import { CardForm } from './components/CardForm';
 import { OfflineBanner } from './components/OfflineBanner';
 import { AuthPanel } from './components/AuthPanel';
+import { ConfirmDialog } from './components/ConfirmDialog';
 import './App.css';
 
 // Shared/official content (built-in + anything admins create) can only ever
@@ -51,6 +54,7 @@ export default function App() {
   const [editingCard, setEditingCard] = useState(null);
   const [isEditingCategory, setIsEditingCategory] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [cardPendingDelete, setCardPendingDelete] = useState(null);
 
   useEffect(() => {
     if (!auth.enabled) return;
@@ -156,6 +160,28 @@ export default function App() {
     setEditingCard(null);
   };
 
+  const performDeleteCard = async (card) => {
+    if (card.custom) {
+      // Their own wall card.
+      if (auth.user) {
+        await deleteUserCustomCard(auth.user.id, card.id);
+        setCloudCustomCards((prev) => ({
+          ...prev,
+          [activeCategoryId]: (prev[activeCategoryId] || []).filter((c) => c.id !== card.id),
+        }));
+      } else {
+        setLocalCustomCards(deleteCustomCard(activeCategoryId, card.id));
+      }
+    } else if (card.isGlobal && auth.user && auth.isAdmin) {
+      // Admin-created shared content — deletable, unlike a real built-in card.
+      await deleteGlobalCard(card.id);
+      setGlobalCards((prev) => ({
+        ...prev,
+        [activeCategoryId]: (prev[activeCategoryId] || []).filter((c) => c.id !== card.id),
+      }));
+    }
+  };
+
   const handleSaveCategoryEdit = async (patch) => {
     if (!auth.user || !auth.isAdmin) return; // categories are admin-only to edit
     await saveGlobalCategoryOverride(activeCategoryId, patch, auth.user.id);
@@ -226,6 +252,7 @@ export default function App() {
             onAddCard={() => setIsAdding(true)}
             onEditCard={setEditingCard}
             onCopyToWall={handleCopyToWall}
+            onDeleteCard={setCardPendingDelete}
           />
         </>
       )}
@@ -267,6 +294,22 @@ export default function App() {
           scopeNote="This creates a new shared category everyone will see."
           onCancel={() => setIsAddingCategory(false)}
           onSave={handleSaveNewCategory}
+        />
+      )}
+
+      {cardPendingDelete && (
+        <ConfirmDialog
+          title={`Delete "${cardPendingDelete.title}"?`}
+          body={
+            cardPendingDelete.custom
+              ? "This removes it from your wall. This can't be undone."
+              : "You are an admin: this removes it for every visitor. This can't be undone."
+          }
+          onCancel={() => setCardPendingDelete(null)}
+          onConfirm={async () => {
+            await performDeleteCard(cardPendingDelete);
+            setCardPendingDelete(null);
+          }}
         />
       )}
     </div>

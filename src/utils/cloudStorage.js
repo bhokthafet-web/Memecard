@@ -16,6 +16,8 @@ function rowToCard(row) {
 // Same row shape as a personal card, but deliberately without `custom: true`
 // — a global card is meant to be treated exactly like a built-in one for
 // editing (goes through global/user card overrides, not a direct row update).
+// `isGlobal` marks it as admin-deletable, unlike a real built-in card which
+// only lives in static source (src/data/content.js) and can't be deleted.
 function rowToGlobalCard(row) {
   return {
     id: row.id,
@@ -25,6 +27,7 @@ function rowToGlobalCard(row) {
     imageUrl: row.image_url || null,
     color: '#efecfe',
     audio: row.audio_url || null,
+    isGlobal: true,
   };
 }
 
@@ -107,6 +110,15 @@ export async function updateUserCustomCard(userId, cardId, patch) {
   if (error) throw error;
 }
 
+export async function deleteUserCustomCard(userId, cardId) {
+  const { error } = await supabase
+    .from('user_custom_cards')
+    .delete()
+    .eq('id', cardId)
+    .eq('user_id', userId);
+  if (error) throw error;
+}
+
 // Admin-created "official" content — new categories/cards that show up for
 // every visitor, as opposed to one user's private additions above.
 export async function fetchGlobalCategories() {
@@ -164,4 +176,9 @@ export async function insertGlobalCard(userId, categoryId, card) {
     .single();
   if (error) throw error;
   return rowToGlobalCard(data);
+}
+
+export async function deleteGlobalCard(cardId) {
+  const { error } = await supabase.from('global_cards').delete().eq('id', cardId);
+  if (error) throw error;
 }

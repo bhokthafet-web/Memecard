@@ -2,7 +2,7 @@ import { MemeCard } from './MemeCard';
 import { BluetoothHelp } from './BluetoothHelp';
 import './CardGrid.css';
 
-export function CardGrid({ category, isAdmin, onAddCard, onEditCard, onCopyToWall }) {
+export function CardGrid({ category, isAdmin, onAddCard, onEditCard, onCopyToWall, onDeleteCard }) {
   return (
     <div>
       <div className="card-grid">
@@ -12,8 +12,10 @@ export function CardGrid({ category, isAdmin, onAddCard, onEditCard, onCopyToWal
             card={card}
             canEdit={isAdmin || Boolean(card.custom)}
             canAddToWall={!isAdmin && !card.custom}
+            canDelete={Boolean(card.custom) || (isAdmin && Boolean(card.isGlobal))}
             onEdit={onEditCard}
             onAddToWall={onCopyToWall}
+            onDelete={onDeleteCard}
           />
         ))}
 

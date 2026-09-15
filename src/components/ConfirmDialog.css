@@ -1,0 +1,62 @@
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 35, 0.5);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 80;
+  animation: overlay-in 0.15s ease;
+}
+
+.confirm-dialog {
+  width: 100%;
+  max-width: 300px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 22px 20px 18px;
+  box-shadow: var(--shadow-lg);
+  animation: modal-pop-in 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.confirm-title {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.confirm-body {
+  margin: 0 0 16px;
+  font-size: 0.84rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.confirm-cancel,
+.confirm-delete {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.confirm-cancel {
+  --pop-shadow: #d8d8de;
+  background: #f2f2f6;
+  color: var(--color-text);
+}
+
+.confirm-delete {
+  --pop-shadow: #b23230;
+  background: var(--color-danger);
+  color: #fff;
+}
