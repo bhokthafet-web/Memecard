@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { processCardImage } from '../utils/image';
 import './CardForm.css';
 
 const EMOJI_CHOICES = ['🗂️', '📚', '🍎', '🐶', '🚗', '🌟', '🎵', '☀️', '🏠', '❤️', '🎉', '☕'];
@@ -24,6 +25,7 @@ export function CardForm({ categoryTitle, card, scopeNote, onCancel, onSave }) {
   const [audioIsNew, setAudioIsNew] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [processingPhoto, setProcessingPhoto] = useState(false);
   const photoInputRef = useRef(null);
 
   const handlePhotoChange = async (e) => {
@@ -34,11 +36,17 @@ export function CardForm({ categoryTitle, card, scopeNote, onCancel, onSave }) {
       return;
     }
     setError('');
+    setProcessingPhoto(true);
     try {
-      const dataUrl = await readFileAsDataUrl(file);
+      // Center-crop to a square and compress before it ever touches state —
+      // a phone photo can be several MB and isn't square, but the preview
+      // (and the card itself) is always a small circle.
+      const dataUrl = await processCardImage(file);
       setPhoto(dataUrl);
     } catch {
       setError('Could not read that image. Try a different one.');
+    } finally {
+      setProcessingPhoto(false);
     }
   };
 
@@ -146,10 +154,11 @@ export function CardForm({ categoryTitle, card, scopeNote, onCancel, onSave }) {
                 type="button"
                 className="photo-upload-btn pop-btn"
                 onClick={() => photoInputRef.current?.click()}
+                disabled={processingPhoto}
               >
-                📷 Upload photo
+                {processingPhoto ? 'Compressing…' : '📷 Upload photo'}
               </button>
-              {photo && (
+              {photo && !processingPhoto && (
                 <button type="button" className="photo-remove-btn" onClick={() => setPhoto(null)}>
                   Remove photo
                 </button>
