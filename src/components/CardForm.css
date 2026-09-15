@@ -117,14 +117,14 @@
 }
 
 .photo-preview {
-  width: 52px;
-  height: 52px;
-  min-width: 52px;
+  width: 73px;
+  height: 73px;
+  min-width: 73px;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 2rem;
   overflow: hidden;
   background: var(--color-primary-soft);
 }
