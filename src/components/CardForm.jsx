@@ -136,7 +136,7 @@ export function CardForm({ categoryTitle, card, scopeNote, onCancel, onSave }) {
         </label>
 
         <div className="card-form-field">
-          <span>Image</span>
+          <span>Image (optional)</span>
           <div className="photo-picker">
             <div className="photo-preview" style={{ background: '#efecfe' }}>
               {photo ? <img src={photo} alt="" /> : <span aria-hidden="true">{emoji}</span>}

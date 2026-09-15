@@ -2,12 +2,19 @@ import { MemeCard } from './MemeCard';
 import { BluetoothHelp } from './BluetoothHelp';
 import './CardGrid.css';
 
-export function CardGrid({ category, onAddCard, onEditCard }) {
+export function CardGrid({ category, isAdmin, onAddCard, onEditCard, onCopyToWall }) {
   return (
     <div>
       <div className="card-grid">
         {category.cards.map((card) => (
-          <MemeCard key={card.id} card={card} onEdit={onEditCard} />
+          <MemeCard
+            key={card.id}
+            card={card}
+            canEdit={isAdmin || Boolean(card.custom)}
+            canAddToWall={!isAdmin && !card.custom}
+            onEdit={onEditCard}
+            onAddToWall={onCopyToWall}
+          />
         ))}
 
         <button type="button" className="card-tile-add pop-btn" onClick={onAddCard}>

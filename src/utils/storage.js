@@ -1,6 +1,10 @@
 const STORAGE_KEY = 'memecard.customCards.v1';
 
-// Custom cards are keyed by categoryId so each category can show its own additions.
+// A guest's (not signed in) personal cards — their "wall" for this browser
+// only. Keyed by categoryId so each category can show its own additions.
+// Signed-out visitors can never edit the shared/official cards in place —
+// only copy one to their wall (see App.jsx's handleCopyToWall) or add a new
+// one from scratch, both of which land here.
 export function loadCustomCards() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -48,39 +52,3 @@ export function deleteCustomCard(categoryId, cardId) {
   }
   return next;
 }
-
-// Built-in cards/categories live in static data (src/data/content.js), so
-// edits to them can't mutate that module — instead we keep a patch per id and
-// merge it in at render time (see App.jsx). Both cards and categories use the
-// same shape (id -> patch object), just under different localStorage keys.
-function createOverrideStore(storageKey) {
-  return {
-    load() {
-      try {
-        const raw = localStorage.getItem(storageKey);
-        return raw ? JSON.parse(raw) : {};
-      } catch {
-        return {};
-      }
-    },
-    save(id, patch) {
-      const all = this.load();
-      const next = { ...all, [id]: { ...(all[id] || {}), ...patch } };
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      return next;
-    },
-  };
-}
-
-const cardOverrideStore = createOverrideStore('memecard.cardOverrides.v1');
-export const loadCardOverrides = () => cardOverrideStore.load();
-export const saveCardOverride = (cardId, patch) => cardOverrideStore.save(cardId, patch);
-
-const categoryOverrideStore = createOverrideStore('memecard.categoryOverrides.v1');
-export const loadCategoryOverrides = () => categoryOverrideStore.load();
-export const saveCategoryOverride = (categoryId, patch) =>
-  categoryOverrideStore.save(categoryId, patch);

@@ -93,9 +93,12 @@ create policy "user cards: owner full access"
   with check (auth.uid() = user_id);
 
 -- ---------------------------------------------------------------------------
--- user_card_overrides: a signed-in user's personal edits to a built-in card.
--- Private — lets a user tweak their own copy without changing it for anyone
--- else (that's what global_card_overrides + the admin role is for).
+-- user_card_overrides / user_category_overrides (below): NOT used by the app
+-- anymore — kept only so existing rows aren't orphaned if you already ran an
+-- earlier version of this schema. The app no longer lets a user patch a
+-- shared card/category in place; they copy it to their own wall
+-- (user_custom_cards) instead, which is fully theirs to edit. Safe to drop
+-- both tables if you're setting this up fresh and don't need the history.
 -- ---------------------------------------------------------------------------
 create table if not exists public.user_card_overrides (
   user_id uuid not null references auth.users (id) on delete cascade,
@@ -114,9 +117,11 @@ create policy "user overrides: owner full access"
   with check (auth.uid() = user_id);
 
 -- ---------------------------------------------------------------------------
--- global_category_overrides / user_category_overrides: same admin-vs-personal
--- pattern as the card override tables above, but for editing a category's
--- own title/emoji/description instead of one card.
+-- global_category_overrides: admin edits to a category's own
+-- title/emoji/description, applied for every visitor — same pattern as
+-- global_card_overrides above. (user_category_overrides further down is the
+-- category equivalent of user_card_overrides: no longer used, kept only for
+-- compatibility with existing rows.)
 -- ---------------------------------------------------------------------------
 create table if not exists public.global_category_overrides (
   category_id text primary key,

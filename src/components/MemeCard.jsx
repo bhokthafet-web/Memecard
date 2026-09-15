@@ -6,19 +6,40 @@ import './MemeCard.css';
 // collection — no popup needed to reach Play. Every card owns its own
 // player; useAudioPlayer makes sure starting one stops any other that's
 // mid-playback, and tears itself down if the card is ever removed from view.
-export function MemeCard({ card, onEdit }) {
+//
+// `canEdit` is only true for a card this viewer actually owns (their own
+// wall card) or, for shared/official content, when they're an admin.
+// `canAddToWall` is the alternative for everyone else viewing shared
+// content: they can't edit the original, but can copy it to their own wall.
+export function MemeCard({ card, canEdit, canAddToWall, onEdit, onAddToWall }) {
   const { status, progress, play } = useAudioPlayer(card.audio);
 
   return (
     <div className="meme-card">
-      <button
-        type="button"
-        className="meme-card-edit pop-btn"
-        onClick={() => onEdit(card)}
-        aria-label={`Edit ${card.title}`}
-      >
-        ✏️
-      </button>
+      <div className="meme-card-actions">
+        {canAddToWall && (
+          <button
+            type="button"
+            className="meme-card-action pop-btn"
+            onClick={() => onAddToWall(card)}
+            aria-label={`Add ${card.title} to my wall`}
+            title="Add to my wall"
+          >
+            📥
+          </button>
+        )}
+        {canEdit && (
+          <button
+            type="button"
+            className="meme-card-action pop-btn"
+            onClick={() => onEdit(card)}
+            aria-label={`Edit ${card.title}`}
+            title="Edit"
+          >
+            ✏️
+          </button>
+        )}
+      </div>
 
       <div className="meme-card-image" style={{ background: card.color || '#efecfe' }}>
         {card.imageUrl ? (

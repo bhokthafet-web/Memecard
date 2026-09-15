@@ -28,13 +28,12 @@ function rowToGlobalCard(row) {
   };
 }
 
-// Shared shape for every override table: { <id column>, patch }, optionally
-// scoped to a user. Cards and categories both use this pattern, just against
-// different tables — see supabase/schema.sql.
-async function fetchPatchMap(table, idColumn, scopeUserId) {
-  let query = supabase.from(table).select(`${idColumn}, patch`);
-  if (scopeUserId) query = query.eq('user_id', scopeUserId);
-  const { data, error } = await query;
+// Shared shape for every override table: { <id column>, patch }. Only admins
+// can ever write these (enforced by RLS) — a regular user never edits shared
+// content in place, they copy it to their own wall instead (see
+// insertUserCustomCard below and App.jsx's handleCopyToWall).
+async function fetchPatchMap(table, idColumn) {
+  const { data, error } = await supabase.from(table).select(`${idColumn}, patch`);
   if (error) throw error;
   return Object.fromEntries((data || []).map((row) => [row[idColumn], row.patch]));
 }
@@ -46,36 +45,17 @@ async function upsertGlobalOverride(table, idColumn, id, patch, userId) {
   if (error) throw error;
 }
 
-async function upsertUserOverride(table, idColumn, userId, id, patch) {
-  const { error } = await supabase
-    .from(table)
-    .upsert({ user_id: userId, [idColumn]: id, patch, updated_at: new Date().toISOString() });
-  if (error) throw error;
-}
-
-// Built-in card edits that apply to every visitor (admin-only to write,
-// public to read).
+// Admin edits to a built-in or admin-created card that apply to every
+// visitor.
 export const fetchGlobalOverrides = () => fetchPatchMap('global_card_overrides', 'card_id');
 export const saveGlobalOverride = (cardId, patch, userId) =>
   upsertGlobalOverride('global_card_overrides', 'card_id', cardId, patch, userId);
 
-// A signed-in user's personal tweaks to a built-in card — visible only to
-// them, layered on top of any global override an admin has made.
-export const fetchUserOverrides = (userId) => fetchPatchMap('user_card_overrides', 'card_id', userId);
-export const saveUserOverride = (userId, cardId, patch) =>
-  upsertUserOverride('user_card_overrides', 'card_id', userId, cardId, patch);
-
-// Same admin-vs-personal pattern, for editing a category's own
-// title/emoji/description instead of one card.
+// Same, for a category's own title/emoji/description.
 export const fetchGlobalCategoryOverrides = () =>
   fetchPatchMap('global_category_overrides', 'category_id');
 export const saveGlobalCategoryOverride = (categoryId, patch, userId) =>
   upsertGlobalOverride('global_category_overrides', 'category_id', categoryId, patch, userId);
-
-export const fetchUserCategoryOverrides = (userId) =>
-  fetchPatchMap('user_category_overrides', 'category_id', userId);
-export const saveUserCategoryOverride = (userId, categoryId, patch) =>
-  upsertUserOverride('user_category_overrides', 'category_id', userId, categoryId, patch);
 
 // A signed-in user's own personal cards, grouped by category id (same shape
 // the rest of the app already expects from localStorage).

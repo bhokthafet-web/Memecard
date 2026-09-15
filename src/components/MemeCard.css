@@ -10,12 +10,17 @@
   box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.3);
 }
 
-.meme-card-edit {
-  --pop-shadow: #d6d8dd;
-  --pop-lift: 3px;
+.meme-card-actions {
   position: absolute;
   top: 12px;
   right: 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.meme-card-action {
+  --pop-shadow: #d6d8dd;
+  --pop-lift: 3px;
   width: 32px;
   height: 32px;
   border-radius: 50%;

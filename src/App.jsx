@@ -1,26 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CATEGORIES } from './data/content';
-import {
-  loadCustomCards,
-  saveCustomCard,
-  updateCustomCard,
-  loadCardOverrides,
-  saveCardOverride,
-  loadCategoryOverrides,
-  saveCategoryOverride,
-} from './utils/storage';
+import { loadCustomCards, saveCustomCard, updateCustomCard } from './utils/storage';
 import {
   fetchGlobalOverrides,
   fetchUserCustomCards,
-  fetchUserOverrides,
   insertUserCustomCard,
   updateUserCustomCard,
   saveGlobalOverride,
-  saveUserOverride,
   fetchGlobalCategoryOverrides,
-  fetchUserCategoryOverrides,
   saveGlobalCategoryOverride,
-  saveUserCategoryOverride,
   fetchGlobalCategories,
   insertGlobalCategory,
   fetchGlobalCards,
@@ -36,28 +24,27 @@ import { OfflineBanner } from './components/OfflineBanner';
 import { AuthPanel } from './components/AuthPanel';
 import './App.css';
 
+// Shared/official content (built-in + anything admins create) can only ever
+// be edited by an admin, and that edit applies to every visitor. Everyone
+// else's only way to make a shared card "theirs" is to copy it to their own
+// wall (handleCopyToWall) — from there it's a normal personal card, fully
+// editable by its owner, same as one added from scratch.
 export default function App() {
   const isOnline = useOnlineStatus();
   const auth = useAuth();
 
-  // Local (per-browser, no account) fallback — always used when signed out.
+  // A guest's (not signed in) personal wall — this browser/device only.
   const [localCustomCards, setLocalCustomCards] = useState(() => loadCustomCards());
-  const [localCardOverrides, setLocalCardOverrides] = useState(() => loadCardOverrides());
-  const [localCategoryOverrides, setLocalCategoryOverrides] = useState(() =>
-    loadCategoryOverrides(),
-  );
 
-  // Cloud data. The "global" ones are public (admin-written, everyone reads
-  // them, signed in or not) — this includes brand-new admin-created
-  // categories/cards, not just edits to the built-ins. The rest are per-user
-  // and only populated when someone is signed in.
+  // Public shared data — built-in content plus admin-created categories/cards
+  // and admin edits to any of it. Everyone reads this, signed in or not.
   const [globalCardOverrides, setGlobalCardOverrides] = useState({});
   const [globalCategoryOverrides, setGlobalCategoryOverrides] = useState({});
   const [globalCategories, setGlobalCategories] = useState([]);
   const [globalCards, setGlobalCards] = useState({});
+
+  // A signed-in user's personal wall, synced to their account.
   const [cloudCustomCards, setCloudCustomCards] = useState({});
-  const [cloudCardOverrides, setCloudCardOverrides] = useState({});
-  const [cloudCategoryOverrides, setCloudCategoryOverrides] = useState({});
 
   const [activeCategoryId, setActiveCategoryId] = useState(CATEGORIES[0]?.id || null);
   const [isAdding, setIsAdding] = useState(false);
@@ -76,74 +63,39 @@ export default function App() {
   useEffect(() => {
     if (!auth.enabled || !auth.user) {
       setCloudCustomCards({});
-      setCloudCardOverrides({});
-      setCloudCategoryOverrides({});
       return;
     }
-    Promise.all([
-      fetchUserCustomCards(auth.user.id),
-      fetchUserOverrides(auth.user.id),
-      fetchUserCategoryOverrides(auth.user.id),
-    ])
-      .then(([cards, cardOverrides, categoryOverrides]) => {
-        setCloudCustomCards(cards);
-        setCloudCardOverrides(cardOverrides);
-        setCloudCategoryOverrides(categoryOverrides);
-      })
-      .catch(() => {});
+    fetchUserCustomCards(auth.user.id).then(setCloudCustomCards).catch(() => {});
   }, [auth.enabled, auth.user?.id]);
 
-  const personalCardOverrides = auth.user ? cloudCardOverrides : localCardOverrides;
-  const personalCategoryOverrides = auth.user ? cloudCategoryOverrides : localCategoryOverrides;
-  const personalCustomCards = auth.user ? cloudCustomCards : localCustomCards;
+  const wallCards = auth.user ? cloudCustomCards : localCustomCards;
 
   const categories = useMemo(() => {
     const allCategories = [...CATEGORIES, ...globalCategories];
 
     return allCategories.map((category) => {
-      let merged = category;
-      if (globalCategoryOverrides[category.id]) {
-        merged = { ...merged, ...globalCategoryOverrides[category.id] };
-      }
-      if (personalCategoryOverrides[category.id]) {
-        merged = { ...merged, ...personalCategoryOverrides[category.id] };
-      }
+      const merged = globalCategoryOverrides[category.id]
+        ? { ...category, ...globalCategoryOverrides[category.id] }
+        : category;
 
-      const sharedCards = [...category.cards, ...(globalCards[category.id] || [])];
+      const sharedCards = [...category.cards, ...(globalCards[category.id] || [])].map((card) =>
+        globalCardOverrides[card.id] ? { ...card, ...globalCardOverrides[card.id] } : card,
+      );
 
       return {
         ...merged,
-        cards: [
-          ...sharedCards.map((card) => {
-            let mergedCard = card;
-            if (globalCardOverrides[card.id]) mergedCard = { ...mergedCard, ...globalCardOverrides[card.id] };
-            if (personalCardOverrides[card.id]) mergedCard = { ...mergedCard, ...personalCardOverrides[card.id] };
-            return mergedCard;
-          }),
-          ...(personalCustomCards[category.id] || []),
-        ],
+        cards: [...sharedCards, ...(wallCards[category.id] || [])],
       };
     });
-  }, [
-    globalCategories,
-    globalCategoryOverrides,
-    personalCategoryOverrides,
-    globalCards,
-    globalCardOverrides,
-    personalCardOverrides,
-    personalCustomCards,
-  ]);
+  }, [globalCategories, globalCategoryOverrides, globalCards, globalCardOverrides, wallCards]);
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId) || categories[0] || null;
 
-  const handleSaveNewCard = async (card) => {
-    if (auth.user && auth.isAdmin) {
-      const saved = await insertGlobalCard(auth.user.id, activeCategoryId, card);
-      setGlobalCards((prev) => ({
-        ...prev,
-        [activeCategoryId]: [...(prev[activeCategoryId] || []), saved],
-      }));
-    } else if (auth.user) {
+  // Adds a card to the current user's (or guest's) own wall — used both for
+  // "+ Add Card" (a brand-new card) and "add to my wall" (a copy of a shared
+  // card the visitor doesn't own).
+  const addToMyWall = async (card) => {
+    if (auth.user) {
       const saved = await insertUserCustomCard(auth.user.id, activeCategoryId, card);
       setCloudCustomCards((prev) => ({
         ...prev,
@@ -152,13 +104,38 @@ export default function App() {
     } else {
       setLocalCustomCards(saveCustomCard(activeCategoryId, card));
     }
+  };
+
+  const handleSaveNewCard = async (card) => {
+    if (auth.user && auth.isAdmin) {
+      const saved = await insertGlobalCard(auth.user.id, activeCategoryId, card);
+      setGlobalCards((prev) => ({
+        ...prev,
+        [activeCategoryId]: [...(prev[activeCategoryId] || []), saved],
+      }));
+    } else {
+      await addToMyWall(card);
+    }
     setIsAdding(false);
   };
+
+  const handleCopyToWall = (card) =>
+    addToMyWall({
+      id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      title: card.title,
+      description: card.description,
+      image: card.image,
+      imageUrl: card.imageUrl,
+      color: card.color || '#efecfe',
+      audio: card.audio,
+      custom: true,
+    });
 
   const handleSaveCardEdit = async (patch) => {
     const card = editingCard;
 
     if (card.custom) {
+      // Editing a card the current visitor owns (something on their wall).
       if (auth.user) {
         await updateUserCustomCard(auth.user.id, card.id, patch);
         setCloudCustomCards((prev) => ({
@@ -171,34 +148,21 @@ export default function App() {
         setLocalCustomCards(updateCustomCard(activeCategoryId, card.id, patch));
       }
     } else if (auth.user && auth.isAdmin) {
+      // Editing shared/official content — admin-only, applies to everyone.
       await saveGlobalOverride(card.id, patch, auth.user.id);
       setGlobalCardOverrides((prev) => ({ ...prev, [card.id]: { ...(prev[card.id] || {}), ...patch } }));
-    } else if (auth.user) {
-      await saveUserOverride(auth.user.id, card.id, patch);
-      setCloudCardOverrides((prev) => ({ ...prev, [card.id]: { ...(prev[card.id] || {}), ...patch } }));
-    } else {
-      setLocalCardOverrides(saveCardOverride(card.id, patch));
     }
 
     setEditingCard(null);
   };
 
   const handleSaveCategoryEdit = async (patch) => {
-    if (auth.user && auth.isAdmin) {
-      await saveGlobalCategoryOverride(activeCategoryId, patch, auth.user.id);
-      setGlobalCategoryOverrides((prev) => ({
-        ...prev,
-        [activeCategoryId]: { ...(prev[activeCategoryId] || {}), ...patch },
-      }));
-    } else if (auth.user) {
-      await saveUserCategoryOverride(auth.user.id, activeCategoryId, patch);
-      setCloudCategoryOverrides((prev) => ({
-        ...prev,
-        [activeCategoryId]: { ...(prev[activeCategoryId] || {}), ...patch },
-      }));
-    } else {
-      setLocalCategoryOverrides(saveCategoryOverride(activeCategoryId, patch));
-    }
+    if (!auth.user || !auth.isAdmin) return; // categories are admin-only to edit
+    await saveGlobalCategoryOverride(activeCategoryId, patch, auth.user.id);
+    setGlobalCategoryOverrides((prev) => ({
+      ...prev,
+      [activeCategoryId]: { ...(prev[activeCategoryId] || {}), ...patch },
+    }));
     setIsEditingCategory(false);
   };
 
@@ -209,21 +173,14 @@ export default function App() {
     setIsAddingCategory(false);
   };
 
-  const scopeNoteFor = (isPersonalItem) =>
-    isPersonalItem
-      ? auth.user
-        ? 'Saved to your account — visible on any device you sign into.'
-        : 'Saved on this device only. Sign in to sync it to your account.'
-      : auth.user && auth.isAdmin
-        ? 'You are an admin: this change updates it for every visitor.'
-        : auth.user
-          ? 'This only edits your personal copy — other people still see the original.'
-          : 'Saved on this device only. Sign in to sync it to your account.';
+  const wallScopeNote = auth.user
+    ? 'Added to your wall — visible on any device you sign into.'
+    : 'Added to your wall on this device only. Sign in to sync it to your account.';
 
   const addCardScopeNote =
     auth.user && auth.isAdmin
       ? 'You are an admin: this card is added for every visitor, not just you.'
-      : scopeNoteFor(true);
+      : wallScopeNote;
 
   return (
     <div className="app">
@@ -248,14 +205,16 @@ export default function App() {
             <div className="category-header-text">
               <span aria-hidden="true">{activeCategory.emoji}</span>
               <h2>{activeCategory.title}</h2>
-              <button
-                type="button"
-                className="category-edit-btn pop-btn"
-                onClick={() => setIsEditingCategory(true)}
-                aria-label={`Edit ${activeCategory.title}`}
-              >
-                ✏️
-              </button>
+              {auth.isAdmin && (
+                <button
+                  type="button"
+                  className="category-edit-btn pop-btn"
+                  onClick={() => setIsEditingCategory(true)}
+                  aria-label={`Edit ${activeCategory.title}`}
+                >
+                  ✏️
+                </button>
+              )}
             </div>
             {activeCategory.description && (
               <p className="category-header-desc">{activeCategory.description}</p>
@@ -264,8 +223,10 @@ export default function App() {
 
           <CardGrid
             category={activeCategory}
+            isAdmin={auth.isAdmin}
             onAddCard={() => setIsAdding(true)}
             onEditCard={setEditingCard}
+            onCopyToWall={handleCopyToWall}
           />
         </>
       )}
@@ -283,22 +244,26 @@ export default function App() {
         <CardForm
           categoryTitle={activeCategory.title}
           card={editingCard}
-          scopeNote={scopeNoteFor(Boolean(editingCard.custom))}
+          scopeNote={
+            editingCard.custom
+              ? wallScopeNote
+              : 'You are an admin: this change updates it for every visitor.'
+          }
           onCancel={() => setEditingCard(null)}
           onSave={handleSaveCardEdit}
         />
       )}
 
-      {isEditingCategory && activeCategory && (
+      {isEditingCategory && activeCategory && auth.isAdmin && (
         <CategoryForm
           category={activeCategory}
-          scopeNote={scopeNoteFor(false)}
+          scopeNote="You are an admin: this change updates it for every visitor."
           onCancel={() => setIsEditingCategory(false)}
           onSave={handleSaveCategoryEdit}
         />
       )}
 
-      {isAddingCategory && (
+      {isAddingCategory && auth.isAdmin && (
         <CategoryForm
           scopeNote="This creates a new shared category everyone will see."
           onCancel={() => setIsAddingCategory(false)}
