@@ -143,3 +143,59 @@ create policy "user category overrides: owner full access"
   on public.user_category_overrides for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------------
+-- global_categories / global_cards: brand-new shared content an admin
+-- creates — not edits to existing built-ins, but new "official" categories
+-- and cards that appear for every visitor. This is what lets an admin build
+-- out the curriculum over time, as opposed to user_custom_cards which stay
+-- private to whoever added them.
+--
+-- Once created, a global category/card is treated exactly like a built-in
+-- one for editing purposes: an admin's later edits to it go through
+-- global_card_overrides/global_category_overrides above, and a regular
+-- user's personal tweak to it goes through user_card_overrides/
+-- user_category_overrides — no separate code path needed.
+-- ---------------------------------------------------------------------------
+create table if not exists public.global_categories (
+  id uuid primary key default gen_random_uuid(),
+  title text not null,
+  emoji text not null default '🗂️',
+  description text,
+  created_by uuid references auth.users (id),
+  created_at timestamptz not null default now()
+);
+
+alter table public.global_categories enable row level security;
+
+create policy "global categories: readable by everyone"
+  on public.global_categories for select
+  using (true);
+
+create policy "global categories: admins can write"
+  on public.global_categories for all
+  using (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'))
+  with check (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'));
+
+create table if not exists public.global_cards (
+  id uuid primary key default gen_random_uuid(),
+  category_id text not null,
+  title text not null,
+  description text,
+  image text,
+  image_url text,
+  audio_url text,
+  created_by uuid references auth.users (id),
+  created_at timestamptz not null default now()
+);
+
+alter table public.global_cards enable row level security;
+
+create policy "global cards: readable by everyone"
+  on public.global_cards for select
+  using (true);
+
+create policy "global cards: admins can write"
+  on public.global_cards for all
+  using (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'))
+  with check (exists (select 1 from public.profiles where id = auth.uid() and role = 'admin'));

@@ -21,6 +21,10 @@ import {
   fetchUserCategoryOverrides,
   saveGlobalCategoryOverride,
   saveUserCategoryOverride,
+  fetchGlobalCategories,
+  insertGlobalCategory,
+  fetchGlobalCards,
+  insertGlobalCard,
 } from './utils/cloudStorage';
 import { useAuth } from './hooks/useAuth';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
@@ -44,10 +48,13 @@ export default function App() {
   );
 
   // Cloud data. The "global" ones are public (admin-written, everyone reads
-  // them, signed in or not). The rest are per-user and only populated when
-  // someone is signed in.
+  // them, signed in or not) — this includes brand-new admin-created
+  // categories/cards, not just edits to the built-ins. The rest are per-user
+  // and only populated when someone is signed in.
   const [globalCardOverrides, setGlobalCardOverrides] = useState({});
   const [globalCategoryOverrides, setGlobalCategoryOverrides] = useState({});
+  const [globalCategories, setGlobalCategories] = useState([]);
+  const [globalCards, setGlobalCards] = useState({});
   const [cloudCustomCards, setCloudCustomCards] = useState({});
   const [cloudCardOverrides, setCloudCardOverrides] = useState({});
   const [cloudCategoryOverrides, setCloudCategoryOverrides] = useState({});
@@ -56,11 +63,14 @@ export default function App() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
   const [isEditingCategory, setIsEditingCategory] = useState(false);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
 
   useEffect(() => {
     if (!auth.enabled) return;
     fetchGlobalOverrides().then(setGlobalCardOverrides).catch(() => {});
     fetchGlobalCategoryOverrides().then(setGlobalCategoryOverrides).catch(() => {});
+    fetchGlobalCategories().then(setGlobalCategories).catch(() => {});
+    fetchGlobalCards().then(setGlobalCards).catch(() => {});
   }, [auth.enabled]);
 
   useEffect(() => {
@@ -87,36 +97,53 @@ export default function App() {
   const personalCategoryOverrides = auth.user ? cloudCategoryOverrides : localCategoryOverrides;
   const personalCustomCards = auth.user ? cloudCustomCards : localCustomCards;
 
-  const categories = useMemo(
-    () =>
-      CATEGORIES.map((category) => {
-        let merged = category;
-        if (globalCategoryOverrides[category.id]) {
-          merged = { ...merged, ...globalCategoryOverrides[category.id] };
-        }
-        if (personalCategoryOverrides[category.id]) {
-          merged = { ...merged, ...personalCategoryOverrides[category.id] };
-        }
-        return {
-          ...merged,
-          cards: [
-            ...category.cards.map((card) => {
-              let mergedCard = card;
-              if (globalCardOverrides[card.id]) mergedCard = { ...mergedCard, ...globalCardOverrides[card.id] };
-              if (personalCardOverrides[card.id]) mergedCard = { ...mergedCard, ...personalCardOverrides[card.id] };
-              return mergedCard;
-            }),
-            ...(personalCustomCards[category.id] || []),
-          ],
-        };
-      }),
-    [globalCategoryOverrides, personalCategoryOverrides, globalCardOverrides, personalCardOverrides, personalCustomCards],
-  );
+  const categories = useMemo(() => {
+    const allCategories = [...CATEGORIES, ...globalCategories];
+
+    return allCategories.map((category) => {
+      let merged = category;
+      if (globalCategoryOverrides[category.id]) {
+        merged = { ...merged, ...globalCategoryOverrides[category.id] };
+      }
+      if (personalCategoryOverrides[category.id]) {
+        merged = { ...merged, ...personalCategoryOverrides[category.id] };
+      }
+
+      const sharedCards = [...category.cards, ...(globalCards[category.id] || [])];
+
+      return {
+        ...merged,
+        cards: [
+          ...sharedCards.map((card) => {
+            let mergedCard = card;
+            if (globalCardOverrides[card.id]) mergedCard = { ...mergedCard, ...globalCardOverrides[card.id] };
+            if (personalCardOverrides[card.id]) mergedCard = { ...mergedCard, ...personalCardOverrides[card.id] };
+            return mergedCard;
+          }),
+          ...(personalCustomCards[category.id] || []),
+        ],
+      };
+    });
+  }, [
+    globalCategories,
+    globalCategoryOverrides,
+    personalCategoryOverrides,
+    globalCards,
+    globalCardOverrides,
+    personalCardOverrides,
+    personalCustomCards,
+  ]);
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId) || categories[0] || null;
 
   const handleSaveNewCard = async (card) => {
-    if (auth.user) {
+    if (auth.user && auth.isAdmin) {
+      const saved = await insertGlobalCard(auth.user.id, activeCategoryId, card);
+      setGlobalCards((prev) => ({
+        ...prev,
+        [activeCategoryId]: [...(prev[activeCategoryId] || []), saved],
+      }));
+    } else if (auth.user) {
       const saved = await insertUserCustomCard(auth.user.id, activeCategoryId, card);
       setCloudCustomCards((prev) => ({
         ...prev,
@@ -175,6 +202,13 @@ export default function App() {
     setIsEditingCategory(false);
   };
 
+  const handleSaveNewCategory = async (fields) => {
+    const saved = await insertGlobalCategory(auth.user.id, fields);
+    setGlobalCategories((prev) => [...prev, saved]);
+    setActiveCategoryId(saved.id);
+    setIsAddingCategory(false);
+  };
+
   const scopeNoteFor = (isPersonalItem) =>
     isPersonalItem
       ? auth.user
@@ -185,6 +219,11 @@ export default function App() {
         : auth.user
           ? 'This only edits your personal copy — other people still see the original.'
           : 'Saved on this device only. Sign in to sync it to your account.';
+
+  const addCardScopeNote =
+    auth.user && auth.isAdmin
+      ? 'You are an admin: this card is added for every visitor, not just you.'
+      : scopeNoteFor(true);
 
   return (
     <div className="app">
@@ -199,6 +238,8 @@ export default function App() {
         categories={categories}
         activeId={activeCategory?.id}
         onSelect={setActiveCategoryId}
+        canAdd={auth.isAdmin}
+        onAddCategory={() => setIsAddingCategory(true)}
       />
 
       {activeCategory && (
@@ -232,7 +273,7 @@ export default function App() {
       {isAdding && activeCategory && (
         <CardForm
           categoryTitle={activeCategory.title}
-          scopeNote={scopeNoteFor(true)}
+          scopeNote={addCardScopeNote}
           onCancel={() => setIsAdding(false)}
           onSave={handleSaveNewCard}
         />
@@ -254,6 +295,14 @@ export default function App() {
           scopeNote={scopeNoteFor(false)}
           onCancel={() => setIsEditingCategory(false)}
           onSave={handleSaveCategoryEdit}
+        />
+      )}
+
+      {isAddingCategory && (
+        <CategoryForm
+          scopeNote="This creates a new shared category everyone will see."
+          onCancel={() => setIsAddingCategory(false)}
+          onSave={handleSaveNewCategory}
         />
       )}
     </div>

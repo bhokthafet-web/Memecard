@@ -12,20 +12,27 @@ npm install
 npm run dev
 ```
 
-## Deploy to Netlify
+## Deploy
 
-`netlify.toml` is already set up (build command `npm run build`, publish dir
-`dist`, SPA fallback redirect). Two ways to ship it:
+**Live at:** https://bhokthafet-web.github.io/Memecard/
 
-- **Netlify CLI**: `npx netlify-cli deploy --build --prod` from this folder
-  (first run will ask you to log in and link/create a site).
-- **Git-based**: push this folder to a GitHub/GitLab repo and "Import an
-  existing project" in the Netlify dashboard — it reads `netlify.toml`
-  automatically, no manual config needed.
+Deployed via GitHub Pages: `.github/workflows/deploy.yml` builds the app with
+Vite and publishes `dist/` on every push to `main`. `vite.config.js` sets
+`base: '/Memecard/'` to match the Pages URL — change that if you fork this
+under a different repo name. Supabase's URL/key are read from repo secrets
+(`Settings → Secrets and variables → Actions`) at build time, so update them
+there (`gh secret set VITE_SUPABASE_URL ...`) rather than in a local `.env` if
+you rotate them.
 
-Without Supabase configured (see below), the app runs in local-only mode: a
-Netlify deploy works fine, but custom cards and edits live per-browser/device,
-not in a shared account. Set up Supabase first if you want real accounts.
+A `netlify.toml` is also included if you'd rather deploy to Netlify instead
+(or in addition) — import the repo there and it picks up the build command
+and publish dir automatically; just remember to add the same two `VITE_*`
+environment variables in Netlify's own dashboard first, since a local `.env`
+has no effect on either platform's build.
+
+Without Supabase configured (see below), the app runs in local-only mode:
+deploying works fine either way, but custom cards and edits live
+per-browser/device, not in a shared account.
 
 ## Accounts & per-user cards (Supabase)
 
@@ -37,18 +44,30 @@ role, and cards that follow a user across devices.
 
 | Who | Can do |
 |---|---|
-| Signed-out visitor | Browse all cards (including any admin edits), use the app fully via `localStorage` on that device |
-| Signed-in user | Everything above, plus: personal cards and personal edits to any card sync to their account across devices |
-| Signed-in admin | Everything a user can do, plus: editing a built-in card (French/Spanish/English Basics) changes it for **everyone**, including signed-out visitors |
+| Signed-out visitor | Browse all cards and categories (including admin-added ones), use the app fully via `localStorage` on that device |
+| Signed-in user | Everything above, plus: personal cards and personal edits to any card/category sync to their account across devices |
+| Signed-in admin | Everything a user can do, plus: **creating** brand-new categories and cards that show up for every visitor (not just editing the existing built-ins) — this is how you grow the curriculum over time |
 
-Three tables make this work (see `supabase/schema.sql` for the full DDL +
-row-level security policies):
+There's no separate admin sign-in — it's the same email/password flow as
+everyone else. What makes someone an admin is one field, `role`, on their row
+in `profiles` (`'user'` by default). No UI ever lets a user set this on
+themselves; you promote someone with one SQL statement (step 7 below), and
+Postgres row-level security enforces the admin-only writes at the database
+level, not just in the app's UI.
 
-- `global_card_overrides` — admin-writable, world-readable. Patches to the
-  built-in cards that apply to every visitor.
-- `user_custom_cards` / `user_card_overrides` — private per user (RLS-scoped
-  to `auth.uid()`). A user's own added cards and their personal tweaks to any
-  card, visible only to them.
+Six tables make this work (see `supabase/schema.sql` for the full DDL + RLS
+policies):
+
+- `global_categories` / `global_cards` — admin-writable, world-readable.
+  Brand-new "official" categories and cards an admin creates from scratch —
+  tapping **+ New** next to the category tabs, or **+ Add Card** while signed
+  in as admin, writes here instead of to your personal collection.
+- `global_card_overrides` / `global_category_overrides` — admin-writable,
+  world-readable. *Edits* to any existing card/category (built-in or
+  admin-created) that apply to every visitor.
+- `user_custom_cards` / `user_card_overrides` / `user_category_overrides` —
+  private per user (RLS-scoped to `auth.uid()`). A user's own added cards and
+  their personal tweaks to any card or category, visible only to them.
 
 **Setup:**
 
@@ -71,10 +90,9 @@ row-level security policies):
    update public.profiles set role = 'admin' where email = 'you@example.com';
    ```
 
-**Deploying with Supabase to Netlify:** Vite bakes `VITE_*` env vars in at
-build time, so add the same two variables in **Site settings → Environment
-variables** in the Netlify dashboard before you deploy (or `netlify env:set`
-via the CLI) — a `.env` file on your machine has no effect on Netlify's build.
+See the "Deploy" section above for where these two values need to live for
+GitHub Pages (repo secrets) vs. Netlify (its own dashboard) — either way, a
+local `.env` only affects `npm run dev`/`npm run build` on your machine.
 
 ## Architecture notes
 

@@ -2,7 +2,7 @@ import './CategoryTabs.css';
 
 // A horizontally scrollable tab bar — switching tabs swaps the card grid
 // below without leaving the page (no more drill-down/back navigation).
-export function CategoryTabs({ categories, activeId, onSelect }) {
+export function CategoryTabs({ categories, activeId, onSelect, canAdd, onAddCategory }) {
   return (
     <div className="category-tabs" role="tablist">
       {categories.map((category) => {
@@ -21,6 +21,16 @@ export function CategoryTabs({ categories, activeId, onSelect }) {
           </button>
         );
       })}
+
+      {canAdd && (
+        <button
+          type="button"
+          className="category-tab category-tab-add pop-btn"
+          onClick={onAddCategory}
+        >
+          + New
+        </button>
+      )}
     </div>
   );
 }

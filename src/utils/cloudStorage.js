@@ -13,6 +13,21 @@ function rowToCard(row) {
   };
 }
 
+// Same row shape as a personal card, but deliberately without `custom: true`
+// — a global card is meant to be treated exactly like a built-in one for
+// editing (goes through global/user card overrides, not a direct row update).
+function rowToGlobalCard(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description || '',
+    image: row.image || '🗂️',
+    imageUrl: row.image_url || null,
+    color: '#efecfe',
+    audio: row.audio_url || null,
+  };
+}
+
 // Shared shape for every override table: { <id column>, patch }, optionally
 // scoped to a user. Cards and categories both use this pattern, just against
 // different tables — see supabase/schema.sql.
@@ -110,4 +125,63 @@ export async function updateUserCustomCard(userId, cardId, patch) {
     .eq('id', cardId)
     .eq('user_id', userId);
   if (error) throw error;
+}
+
+// Admin-created "official" content — new categories/cards that show up for
+// every visitor, as opposed to one user's private additions above.
+export async function fetchGlobalCategories() {
+  const { data, error } = await supabase
+    .from('global_categories')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return (data || []).map((row) => ({
+    id: row.id,
+    title: row.title,
+    emoji: row.emoji || '🗂️',
+    description: row.description || '',
+    cards: [],
+  }));
+}
+
+export async function insertGlobalCategory(userId, { title, emoji, description }) {
+  const { data, error } = await supabase
+    .from('global_categories')
+    .insert({ title, emoji, description, created_by: userId })
+    .select()
+    .single();
+  if (error) throw error;
+  return { id: data.id, title: data.title, emoji: data.emoji, description: data.description || '', cards: [] };
+}
+
+export async function fetchGlobalCards() {
+  const { data, error } = await supabase
+    .from('global_cards')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+
+  const grouped = {};
+  for (const row of data || []) {
+    (grouped[row.category_id] ||= []).push(rowToGlobalCard(row));
+  }
+  return grouped;
+}
+
+export async function insertGlobalCard(userId, categoryId, card) {
+  const { data, error } = await supabase
+    .from('global_cards')
+    .insert({
+      category_id: categoryId,
+      title: card.title,
+      description: card.description,
+      image: card.image,
+      image_url: card.imageUrl,
+      audio_url: card.audio,
+      created_by: userId,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToGlobalCard(data);
 }

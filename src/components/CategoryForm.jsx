@@ -2,11 +2,13 @@ import { useState } from 'react';
 import './CardForm.css';
 
 // Editing a category's own title/emoji/description — same admin-vs-personal
-// scope model as editing a card (see App.jsx).
+// scope model as editing a card (see App.jsx). Pass no `category` to create a
+// brand-new one instead (admin-only — see App.jsx's "+ New" tab).
 export function CategoryForm({ category, scopeNote, onCancel, onSave }) {
-  const [title, setTitle] = useState(category.title);
-  const [description, setDescription] = useState(category.description || '');
-  const [emoji, setEmoji] = useState(category.emoji || '');
+  const isEditing = Boolean(category);
+  const [title, setTitle] = useState(category?.title || '');
+  const [description, setDescription] = useState(category?.description || '');
+  const [emoji, setEmoji] = useState(category?.emoji || '🗂️');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -24,7 +26,7 @@ export function CategoryForm({ category, scopeNote, onCancel, onSave }) {
       await onSave({
         title: trimmed,
         description: description.trim(),
-        emoji: emoji.trim() || category.emoji,
+        emoji: emoji.trim() || category?.emoji || '🗂️',
       });
     } catch (err) {
       setError(err?.message || 'Could not save. Try again.');
@@ -46,7 +48,7 @@ export function CategoryForm({ category, scopeNote, onCancel, onSave }) {
           ✕
         </button>
 
-        <h2 className="card-form-heading">Edit Category</h2>
+        <h2 className="card-form-heading">{isEditing ? 'Edit Category' : 'New Category'}</h2>
 
         <label className="card-form-field">
           <span>Icon (emoji)</span>
@@ -61,7 +63,12 @@ export function CategoryForm({ category, scopeNote, onCancel, onSave }) {
 
         <label className="card-form-field">
           <span>Name</span>
-          <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g. Japanese Basics"
+          />
         </label>
 
         <label className="card-form-field">
@@ -70,6 +77,7 @@ export function CategoryForm({ category, scopeNote, onCancel, onSave }) {
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            placeholder="e.g. Everyday greetings and polite phrases"
           />
         </label>
 
@@ -81,7 +89,7 @@ export function CategoryForm({ category, scopeNote, onCancel, onSave }) {
             Cancel
           </button>
           <button type="submit" className="card-form-save pop-btn" disabled={busy}>
-            {busy ? 'Saving…' : 'Save Changes'}
+            {busy ? 'Saving…' : isEditing ? 'Save Changes' : 'Create Category'}
           </button>
         </div>
       </form>

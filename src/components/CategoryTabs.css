@@ -33,3 +33,10 @@
   border-color: transparent;
   color: #fff;
 }
+
+.category-tab-add {
+  --pop-shadow: #cdc3f4;
+  background: #f8f7fc;
+  border: 1.5px dashed #b9aef0;
+  color: #6c5ce7;
+}
