@@ -75,3 +75,30 @@
   font-size: 0.8rem;
   color: var(--color-text-secondary);
 }
+
+.global-load-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(253, 236, 236, 0.75);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid rgba(224, 67, 63, 0.35);
+  color: #9c2a27;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  margin: 0 16px 4px;
+  font-size: 0.8rem;
+}
+
+.global-load-retry {
+  --pop-shadow: #b23230;
+  flex-shrink: 0;
+  background: var(--color-danger);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.76rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+}

@@ -56,14 +56,31 @@ export default function App() {
   const [isEditingCategory, setIsEditingCategory] = useState(false);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [cardPendingDelete, setCardPendingDelete] = useState(null);
+  const [globalLoadError, setGlobalLoadError] = useState(false);
+  const [globalLoadAttempt, setGlobalLoadAttempt] = useState(0);
 
+  // Fetching shared content can fail silently on a flaky connection — that
+  // would look exactly like "an admin's card is missing" with no way to
+  // tell the difference, so any failure here surfaces a visible retry
+  // banner instead of just leaving state empty.
   useEffect(() => {
     if (!auth.enabled) return;
-    fetchGlobalOverrides().then(setGlobalCardOverrides).catch(() => {});
-    fetchGlobalCategoryOverrides().then(setGlobalCategoryOverrides).catch(() => {});
-    fetchGlobalCategories().then(setGlobalCategories).catch(() => {});
-    fetchGlobalCards().then(setGlobalCards).catch(() => {});
-  }, [auth.enabled]);
+    let cancelled = false;
+
+    setGlobalLoadError(false);
+    Promise.all([
+      fetchGlobalOverrides().then(setGlobalCardOverrides),
+      fetchGlobalCategoryOverrides().then(setGlobalCategoryOverrides),
+      fetchGlobalCategories().then(setGlobalCategories),
+      fetchGlobalCards().then(setGlobalCards),
+    ]).catch(() => {
+      if (!cancelled) setGlobalLoadError(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [auth.enabled, globalLoadAttempt]);
 
   useEffect(() => {
     if (!auth.enabled || !auth.user) {
@@ -234,6 +251,19 @@ export default function App() {
       </header>
 
       {!isOnline && <OfflineBanner />}
+
+      {globalLoadError && (
+        <div className="global-load-error">
+          <span>Couldn't load shared content. You may be missing admin-added cards.</span>
+          <button
+            type="button"
+            className="global-load-retry pop-btn"
+            onClick={() => setGlobalLoadAttempt((n) => n + 1)}
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       <CategoryTabs
         categories={categories}
