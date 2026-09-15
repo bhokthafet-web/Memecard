@@ -1,33 +1,33 @@
 .bt-help {
   width: 100%;
   max-width: 320px;
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .bt-help-toggle {
   width: 100%;
   background: none;
   border: none;
-  color: #636e72;
-  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-size: 0.78rem;
   font-weight: 600;
-  padding: 8px 4px;
+  padding: 6px 4px;
   cursor: pointer;
   text-align: center;
 }
 
 .bt-help-body {
-  background: #f8f7fc;
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-size: 0.82rem;
-  color: #57606f;
-  line-height: 1.45;
+  background: #f7f7fb;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.76rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
   text-align: center;
 }
 
 .bt-help-body p {
-  margin: 0 0 6px;
+  margin: 0 0 5px;
 }
 
 .bt-help-body p:last-child {
@@ -36,5 +36,5 @@
 
 .bt-help-question {
   font-weight: 700;
-  color: #2d3436;
+  color: var(--color-text);
 }

@@ -2,66 +2,68 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
 }
 
 .play-button {
-  --pop-shadow: #4a3ba8;
-  --pop-lift: 5px;
+  --pop-shadow: var(--color-primary-dark);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 6px;
   width: 100%;
   max-width: 320px;
-  padding: 16px 24px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #6c5ce7, #8b7cf6);
+  padding: 10px 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .play-button.is-playing {
-  --pop-shadow: #049066;
-  background: linear-gradient(135deg, #00b894, #55efc4);
-  animation: bulge 1.1s ease-in-out infinite;
+  --pop-shadow: #0e9c76;
+  background: var(--color-success);
 }
 
 .play-button.is-error {
-  --pop-shadow: #c9cbd1;
-  background: #f1f2f6;
-  color: #636e72;
+  --pop-shadow: #d8d8de;
+  background: #eeeef3;
+  color: var(--color-text-secondary);
 }
 
 .play-button-icon {
-  font-size: 1.3rem;
+  font-size: 0.9rem;
   line-height: 1;
+  flex-shrink: 0;
+}
+
+.play-button-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .play-button.is-playing .play-button-icon {
   animation: bob 0.7s ease-in-out infinite;
 }
 
-@keyframes bulge {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.12); }
-}
-
 @keyframes bob {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-2px); }
+  50% { transform: translateY(-1px); }
 }
 
 .play-progress-track {
   width: 100%;
   max-width: 320px;
-  height: 5px;
-  border-radius: 999px;
-  background: color-mix(in srgb, currentColor 12%, transparent);
-  background-color: rgba(108, 92, 231, 0.15);
+  height: 3px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-soft);
   overflow: hidden;
 }
 
@@ -69,15 +71,15 @@
   height: 100%;
   width: 100%;
   transform-origin: left;
-  background: linear-gradient(135deg, #6c5ce7, #00b894);
+  background: var(--color-primary);
   transform: scaleX(0);
   transition: transform 0.1s linear;
 }
 
 .play-button-hint {
   margin: 0;
-  font-size: 0.85rem;
-  color: #e17055;
+  font-size: 0.76rem;
+  color: var(--color-danger);
   text-align: center;
   max-width: 300px;
 }

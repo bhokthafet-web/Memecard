@@ -3,44 +3,55 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  background: #fff;
-  border-radius: 24px;
-  padding: 22px 16px 20px;
-  box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.3);
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 18px 14px 16px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.meme-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 .meme-card-actions {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
   display: flex;
-  gap: 6px;
+  gap: 5px;
 }
 
 .meme-card-action {
-  --pop-shadow: #d6d8dd;
-  --pop-lift: 3px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #f1f2f6;
-  font-size: 0.9rem;
+  --pop-shadow: #e2e2ea;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: #f4f4f8;
+  font-size: 0.72rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0.8;
+}
+
+.meme-card-action:hover {
+  opacity: 1;
 }
 
 .meme-card-image {
-  width: 96px;
-  height: 96px;
-  border-radius: 50%;
+  width: 68px;
+  height: 68px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2.6rem;
+  font-size: 1.9rem;
   overflow: hidden;
-  box-shadow: inset 0 0 0 5px rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.6);
 }
 
 .meme-card-image img {
@@ -50,16 +61,18 @@
 }
 
 .meme-card-title {
-  margin: 2px 0 0;
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #2d3436;
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
   text-align: center;
 }
 
 .meme-card-desc {
-  margin: -6px 0 2px;
-  font-size: 0.82rem;
-  color: #808a93;
+  margin: -4px 0 0;
+  font-size: 0.76rem;
+  color: var(--color-text-secondary);
   text-align: center;
+  line-height: 1.3;
 }

@@ -1,21 +1,25 @@
-/* Shared tactile "pop" button treatment: a solid drop underneath the button
-   that flattens on press, like a real physical button popping back up when
-   released. Each user sets --pop-shadow to a darker shade of its own
+/* Shared tactile "pop" treatment: a slim drop underneath the button that
+   flattens on press. Kept subtle on purpose — refined feedback, not a toy
+   bounce. Each user sets --pop-shadow to a darker shade of its own
    background so the drop reads as part of the same button, not a shadow. */
 .pop-btn {
-  --pop-shadow: rgba(0, 0, 0, 0.25);
-  --pop-lift: 4px;
+  --pop-shadow: rgba(20, 20, 43, 0.18);
+  --pop-lift: 2px;
   border: none;
   cursor: pointer;
-  box-shadow: 0 var(--pop-lift) 0 var(--pop-shadow), 0 calc(var(--pop-lift) + 6px) 16px -8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 var(--pop-lift) 0 var(--pop-shadow), var(--shadow-xs);
   transform: translateY(0);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
   -webkit-tap-highlight-color: transparent;
+}
+
+.pop-btn:hover:not(:disabled) {
+  filter: brightness(1.03);
 }
 
 .pop-btn:active:not(:disabled) {
   transform: translateY(var(--pop-lift));
-  box-shadow: 0 0 0 var(--pop-shadow), 0 2px 6px -4px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 0 var(--pop-shadow);
 }
 
 .pop-btn:disabled {

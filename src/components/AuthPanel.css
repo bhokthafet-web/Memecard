@@ -1,57 +1,57 @@
 .auth-panel {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .auth-panel-who {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: #57606f;
-  max-width: 160px;
+  color: var(--color-text-secondary);
+  max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .auth-panel-badge {
-  background: #6c5ce7;
+  background: var(--color-primary);
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 999px;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
   white-space: nowrap;
 }
 
 .auth-panel-signin,
 .auth-panel-signout {
-  --pop-shadow: #4a3ba8;
-  --pop-lift: 3px;
-  background: linear-gradient(135deg, #6c5ce7, #8b7cf6);
+  --pop-shadow: var(--color-primary-dark);
+  background: var(--color-primary);
   color: #fff;
   font-weight: 700;
-  font-size: 0.82rem;
-  padding: 8px 16px;
-  border-radius: 999px;
+  font-size: 0.78rem;
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
   white-space: nowrap;
 }
 
 .auth-panel-signout {
-  --pop-shadow: #d6d8dd;
-  background: #f1f2f6;
-  color: #2d3436;
+  --pop-shadow: #d8d8de;
+  background: #f2f2f6;
+  color: var(--color-text);
 }
 
 .auth-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(20, 18, 34, 0.55);
+  background: rgba(20, 20, 35, 0.5);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,95 +62,96 @@
 .auth-form {
   position: relative;
   width: 100%;
-  max-width: 340px;
-  background: #fff;
-  border-radius: 26px;
-  padding: 30px 22px 22px;
+  max-width: 320px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.45);
+  gap: 12px;
+  box-shadow: var(--shadow-lg);
 }
 
 .auth-form-close {
-  --pop-shadow: #d6d8dd;
-  --pop-lift: 3px;
+  --pop-shadow: #d8d8de;
   position: absolute;
   top: 14px;
   right: 14px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #f1f2f6;
-  font-size: 1rem;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: #f2f2f6;
+  font-size: 0.85rem;
 }
 
 .auth-tabs {
   display: flex;
-  background: #f1f2f6;
-  border-radius: 999px;
-  padding: 4px;
-  gap: 4px;
+  background: #f2f2f6;
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 3px;
 }
 
 .auth-tab {
   flex: 1;
   border: none;
   background: none;
-  padding: 9px 0;
-  border-radius: 999px;
+  padding: 8px 0;
+  border-radius: var(--radius-full);
   font-weight: 700;
-  font-size: 0.82rem;
-  color: #636e72;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary);
   cursor: pointer;
 }
 
 .auth-tab.is-active {
   background: #fff;
-  color: #6c5ce7;
-  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.2);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-xs);
 }
 
 .auth-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #2d3436;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 .auth-field input {
   font: inherit;
   font-weight: 400;
-  padding: 12px 14px;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   outline: none;
+  background: #fbfbfd;
 }
 
 .auth-field input:focus {
-  border-color: #6c5ce7;
+  border-color: var(--color-primary);
+  background: #fff;
 }
 
 .auth-error {
   margin: 0;
-  font-size: 0.82rem;
-  color: #d63031;
+  font-size: 0.78rem;
+  color: var(--color-danger);
 }
 
 .auth-status {
   margin: 0;
-  font-size: 0.82rem;
-  color: #00b894;
+  font-size: 0.78rem;
+  color: var(--color-success);
 }
 
 .auth-submit {
-  --pop-shadow: #4a3ba8;
-  background: linear-gradient(135deg, #6c5ce7, #8b7cf6);
+  --pop-shadow: var(--color-primary-dark);
+  background: var(--color-primary);
   color: #fff;
   font-weight: 700;
-  font-size: 0.9rem;
-  padding: 12px;
-  border-radius: 999px;
+  font-size: 0.85rem;
+  padding: 10px;
+  border-radius: var(--radius-full);
 }
