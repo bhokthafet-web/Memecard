@@ -115,6 +115,21 @@ export default function App() {
       .filter((category) => !category.deleted);
   }, [globalCategories, globalCategoryOverrides, globalCards, globalCardOverrides, wallCards]);
 
+  // If the active category ever stops existing — deleted by an admin, or
+  // simply not loaded yet at first paint — `activeCategory` below falls back
+  // to display categories[0], but activeCategoryId itself doesn't follow
+  // automatically. Every handler that saves/edits/deletes uses
+  // activeCategoryId directly, so leaving it stale meant "+ Add Card" would
+  // silently save into a category that had already disappeared, making the
+  // new card invisible forever. Keep the id itself in sync with what's
+  // actually being shown.
+  useEffect(() => {
+    if (categories.length === 0) return;
+    if (!categories.some((c) => c.id === activeCategoryId)) {
+      setActiveCategoryId(categories[0].id);
+    }
+  }, [categories, activeCategoryId]);
+
   const activeCategory = categories.find((c) => c.id === activeCategoryId) || categories[0] || null;
 
   // Adds a card to the current user's (or guest's) own wall — used both for
