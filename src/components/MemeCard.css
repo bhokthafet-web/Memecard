@@ -12,12 +12,43 @@
   padding: 18px 14px 16px;
   box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s ease, transform 0.12s ease-out;
-  transform-style: preserve-3d;
-  will-change: transform;
 }
 
 .meme-card:hover {
   box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+/* The 3D tilt (set via inline transform in MemeCard.jsx on mousemove) only
+   ever triggers on a real mouse/trackpad — touch never fires mousemove, so
+   there's nothing to promote a GPU layer for there. Scoping preserve-3d/
+   will-change/translateZ to hover-capable, fine-pointer devices only matters
+   for correctness on phones: iOS Safari has a well-known bug where many
+   simultaneous backdrop-filter + 3D-transformed layers in a scrolling list
+   (one full grid of cards, each promoted to its own layer) get dropped and
+   redrawn incorrectly during scroll — cards blank out, cut off, or vanish
+   until something forces a repaint. Keeping cards flat (2D) on touch removes
+   that layer pressure entirely, since the tilt was inert there anyway.
+   The other rendering-cost cut here: a card previously carried up to 3
+   nested backdrop-filter layers (itself + its 2 corner buttons); the corner
+   buttons no longer blur their own background, cutting the per-card blur
+   layer count from ~3 back down to 1 everywhere. */
+@media (hover: hover) and (pointer: fine) {
+  .meme-card {
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .meme-card-actions {
+    transform: translateZ(24px);
+  }
+
+  .meme-card-image {
+    transform: translateZ(20px);
+  }
+
+  .meme-card-title {
+    transform: translateZ(12px);
+  }
 }
 
 /* A soft highlight that follows the cursor (set via --glare-x/--glare-y in
@@ -46,7 +77,6 @@
   right: 10px;
   display: flex;
   gap: 5px;
-  transform: translateZ(24px);
 }
 
 .meme-card-action {
@@ -54,9 +84,7 @@
   width: 26px;
   height: 26px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.6);
   font-size: 0.72rem;
   display: flex;
@@ -71,7 +99,7 @@
 
 .meme-card-action-danger {
   --pop-shadow: #e5b3b1;
-  background: rgba(253, 236, 236, 0.85);
+  background: rgba(253, 236, 236, 0.95);
 }
 
 .meme-card-image {
@@ -85,7 +113,6 @@
   font-size: 3.4rem;
   overflow: hidden;
   box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.6), var(--shadow-sm);
-  transform: translateZ(20px);
 }
 
 .meme-card-image::after {
@@ -110,7 +137,6 @@
   letter-spacing: -0.01em;
   color: var(--color-text);
   text-align: center;
-  transform: translateZ(12px);
 }
 
 .meme-card-desc {
