@@ -101,11 +101,27 @@
   text-align: center;
 }
 
-.search-section-label {
-  margin: 2px 4px 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+.search-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 2px 2px 0;
+}
+
+.search-suggestion-chip {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
   color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.search-suggestion-chip:hover,
+.search-suggestion-chip:active {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
 }

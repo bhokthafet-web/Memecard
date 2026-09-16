@@ -4,7 +4,7 @@ import { SearchResultRow } from './SearchResultRow';
 import './FloatingSearch.css';
 
 const MAX_RESULTS = 30;
-const SUGGESTION_COUNT = 12;
+const SUGGESTION_WORD_COUNT = 15;
 
 // A floating button that expands into an instant search across every card
 // in every category (not just the active one) — searching and playing
@@ -17,8 +17,7 @@ export function FloatingSearch({ categories, onOpenCategory }) {
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
 
-  // Every card, flattened once, in the same order they appear across tabs —
-  // reused both for filtering and for the "before you type anything" list.
+  // Every card, flattened once, in the same order they appear across tabs.
   const allCards = useMemo(() => {
     const list = [];
     for (const category of categories) {
@@ -46,12 +45,27 @@ export function FloatingSearch({ categories, onOpenCategory }) {
     return matches;
   }, [query, allCards]);
 
-  // Opening search with nothing typed yet shouldn't be a dead end — offer a
-  // quick-access list straight away instead of an empty hint.
-  const suggestions = useMemo(() => allCards.slice(0, SUGGESTION_COUNT), [allCards]);
+  // Before anything is typed, offer a row of small tappable word chips (the
+  // first word of a card's title) instead of an empty box — tapping one
+  // fills the search field with that word, which then runs the normal
+  // filtered search below. Deduped case-insensitively so the same common
+  // first word (e.g. multiple titles starting "Aa") only shows once.
+  const suggestionWords = useMemo(() => {
+    const seen = new Set();
+    const words = [];
+    for (const { card } of allCards) {
+      const firstWord = card.title.trim().split(/\s+/)[0];
+      if (!firstWord) continue;
+      const key = firstWord.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      words.push(firstWord);
+      if (words.length >= SUGGESTION_WORD_COUNT) break;
+    }
+    return words;
+  }, [allCards]);
 
   const isSearching = query.trim() !== '';
-  const listToShow = isSearching ? results : suggestions;
 
   const open = () => {
     setIsOpen(true);
@@ -65,6 +79,11 @@ export function FloatingSearch({ categories, onOpenCategory }) {
   const handleOpenCategory = (categoryId) => {
     onOpenCategory(categoryId);
     close();
+  };
+
+  const handlePickWord = (word) => {
+    setQuery(word);
+    inputRef.current?.focus();
   };
 
   return (
@@ -108,23 +127,35 @@ export function FloatingSearch({ categories, onOpenCategory }) {
                 </button>
               </div>
 
-              <div className="search-results">
-                {!isSearching && suggestions.length > 0 && (
-                  <p className="search-section-label">Quick access</p>
-                )}
+              {!isSearching && suggestionWords.length > 0 && (
+                <div className="search-suggestions">
+                  {suggestionWords.map((word) => (
+                    <button
+                      key={word}
+                      type="button"
+                      className="search-suggestion-chip"
+                      onClick={() => handlePickWord(word)}
+                    >
+                      {word}
+                    </button>
+                  ))}
+                </div>
+              )}
 
+              <div className="search-results">
                 {isSearching && results.length === 0 && (
                   <p className="search-hint">No cards match "{query.trim()}".</p>
                 )}
 
-                {listToShow.map(({ card, categoryId, categoryTitle }) => (
-                  <SearchResultRow
-                    key={card.id}
-                    card={card}
-                    categoryTitle={categoryTitle}
-                    onOpenCategory={() => handleOpenCategory(categoryId)}
-                  />
-                ))}
+                {isSearching &&
+                  results.map(({ card, categoryId, categoryTitle }) => (
+                    <SearchResultRow
+                      key={card.id}
+                      card={card}
+                      categoryTitle={categoryTitle}
+                      onOpenCategory={() => handleOpenCategory(categoryId)}
+                    />
+                  ))}
               </div>
             </div>
           </div>,
