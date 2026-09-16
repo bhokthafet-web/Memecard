@@ -4,6 +4,7 @@ import { SearchResultRow } from './SearchResultRow';
 import './FloatingSearch.css';
 
 const MAX_RESULTS = 30;
+const SUGGESTION_COUNT = 12;
 
 // A floating button that expands into an instant search across every card
 // in every category (not just the active one) — searching and playing
@@ -16,24 +17,41 @@ export function FloatingSearch({ categories, onOpenCategory }) {
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
 
+  // Every card, flattened once, in the same order they appear across tabs —
+  // reused both for filtering and for the "before you type anything" list.
+  const allCards = useMemo(() => {
+    const list = [];
+    for (const category of categories) {
+      for (const card of category.cards) {
+        list.push({ card, categoryId: category.id, categoryTitle: category.title });
+      }
+    }
+    return list;
+  }, [categories]);
+
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
 
     const matches = [];
-    for (const category of categories) {
-      for (const card of category.cards) {
-        if (
-          card.title.toLowerCase().includes(q) ||
-          (card.description || '').toLowerCase().includes(q)
-        ) {
-          matches.push({ card, categoryId: category.id, categoryTitle: category.title });
-          if (matches.length >= MAX_RESULTS) return matches;
-        }
+    for (const entry of allCards) {
+      if (
+        entry.card.title.toLowerCase().includes(q) ||
+        (entry.card.description || '').toLowerCase().includes(q)
+      ) {
+        matches.push(entry);
+        if (matches.length >= MAX_RESULTS) break;
       }
     }
     return matches;
-  }, [query, categories]);
+  }, [query, allCards]);
+
+  // Opening search with nothing typed yet shouldn't be a dead end — offer a
+  // quick-access list straight away instead of an empty hint.
+  const suggestions = useMemo(() => allCards.slice(0, SUGGESTION_COUNT), [allCards]);
+
+  const isSearching = query.trim() !== '';
+  const listToShow = isSearching ? results : suggestions;
 
   const open = () => {
     setIsOpen(true);
@@ -91,15 +109,15 @@ export function FloatingSearch({ categories, onOpenCategory }) {
               </div>
 
               <div className="search-results">
-                {query.trim() === '' && (
-                  <p className="search-hint">Type to search every card, in every category.</p>
+                {!isSearching && suggestions.length > 0 && (
+                  <p className="search-section-label">Quick access</p>
                 )}
 
-                {query.trim() !== '' && results.length === 0 && (
+                {isSearching && results.length === 0 && (
                   <p className="search-hint">No cards match "{query.trim()}".</p>
                 )}
 
-                {results.map(({ card, categoryId, categoryTitle }) => (
+                {listToShow.map(({ card, categoryId, categoryTitle }) => (
                   <SearchResultRow
                     key={card.id}
                     card={card}
