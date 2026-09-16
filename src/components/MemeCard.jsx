@@ -18,7 +18,7 @@ const MAX_TILT_DEG = 8;
 // created globally — never a real built-in card, which only exists in
 // source and has no delete path.
 export function MemeCard({ card, canEdit, canAddToWall, canDelete, onEdit, onAddToWall, onDelete }) {
-  const { status, progress, play } = useAudioPlayer(card.audio);
+  const { status, play, progressElRef } = useAudioPlayer(card.audio);
   const cardRef = useRef(null);
 
   // Mouse-tracked 3D tilt: rotate the card toward the cursor and move the
@@ -96,7 +96,7 @@ export function MemeCard({ card, canEdit, canAddToWall, canDelete, onEdit, onAdd
       <h3 className="meme-card-title">{card.title}</h3>
       {card.description && <p className="meme-card-desc">{card.description}</p>}
 
-      <PlayButton status={status} progress={progress} onPlay={play} />
+      <PlayButton status={status} onPlay={play} progressElRef={progressElRef} />
     </div>
   );
 }

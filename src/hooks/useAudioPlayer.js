@@ -13,7 +13,21 @@ let activePlayer = null;
 export function useAudioPlayer(src) {
   const audioRef = useRef(null);
   const [status, setStatus] = useState('idle');
-  const [progress, setProgress] = useState(0);
+
+  // The progress bar fill is mutated directly via this ref (see
+  // PlayButton.jsx) rather than through React state. `timeupdate` can fire
+  // several times a second while playing — running that through setState
+  // re-renders the whole card (and everything inside it) on every tick,
+  // which on iOS Safari means repeatedly repainting a backdrop-filter
+  // element mid-playback, a known trigger for the same layer-compositing
+  // glitches scrolling had. Writing straight to the DOM avoids the
+  // re-render entirely.
+  const progressElRef = useRef(null);
+
+  const setProgressDisplay = (value) => {
+    const el = progressElRef.current;
+    if (el) el.style.transform = `scaleX(${value})`;
+  };
 
   const stop = useCallback(() => {
     const audio = audioRef.current;
@@ -23,7 +37,7 @@ export function useAudioPlayer(src) {
     }
     if (activePlayer === stopRef.current) activePlayer = null;
     setStatus((prev) => (prev === 'error' ? 'error' : 'idle'));
-    setProgress(0);
+    setProgressDisplay(0);
   }, []);
 
   const stopRef = useRef(stop);
@@ -34,7 +48,7 @@ export function useAudioPlayer(src) {
   // closed/previous card keep playing in the background.
   useEffect(() => {
     setStatus('idle');
-    setProgress(0);
+    setProgressDisplay(0);
 
     if (!src) {
       setStatus('error');
@@ -47,11 +61,11 @@ export function useAudioPlayer(src) {
     const handleEnded = () => {
       if (activePlayer === stopRef.current) activePlayer = null;
       setStatus('idle');
-      setProgress(0);
+      setProgressDisplay(0);
     };
     const handleError = () => setStatus('error');
     const handleTimeUpdate = () => {
-      if (audio.duration) setProgress(audio.currentTime / audio.duration);
+      if (audio.duration) setProgressDisplay(audio.currentTime / audio.duration);
     };
 
     audio.addEventListener('ended', handleEnded);
@@ -89,5 +103,5 @@ export function useAudioPlayer(src) {
     }
   }, [status]);
 
-  return { status, progress, play, stop };
+  return { status, play, stop, progressElRef };
 }

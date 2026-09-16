@@ -2,7 +2,11 @@ import './PlayButton.css';
 
 // Presentational only — the parent owns the useAudioPlayer() instance so it can
 // stop/reset playback itself when the card closes (leaving the card).
-export function PlayButton({ status, progress, onPlay }) {
+// `progressElRef` is attached directly to the fill div — useAudioPlayer
+// mutates its transform on every audio tick without going through React
+// state, so a card playing doesn't re-render (and repaint its
+// backdrop-filter) several times a second.
+export function PlayButton({ status, onPlay, progressElRef }) {
   const isPlaying = status === 'playing';
   const isError = status === 'error';
 
@@ -25,10 +29,7 @@ export function PlayButton({ status, progress, onPlay }) {
 
       {!isError && (
         <div className="play-progress-track" aria-hidden="true">
-          <div
-            className="play-progress-fill"
-            style={{ transform: `scaleX(${isPlaying ? progress : 0})` }}
-          />
+          <div className="play-progress-fill" ref={progressElRef} />
         </div>
       )}
 
