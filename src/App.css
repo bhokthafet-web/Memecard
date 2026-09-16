@@ -1,6 +1,8 @@
 .app {
   min-height: 100dvh;
-  padding-bottom: 32px;
+  /* Leaves room so the floating search button never sits on top of the last
+     row of cards when scrolled all the way down. */
+  padding-bottom: 96px;
 }
 
 .app-header {

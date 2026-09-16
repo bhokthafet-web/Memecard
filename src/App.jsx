@@ -27,6 +27,7 @@ import { OfflineBanner } from './components/OfflineBanner';
 import { AuthPanel } from './components/AuthPanel';
 import { ConfirmDialog } from './components/ConfirmDialog';
 import { SettingsMenu } from './components/SettingsMenu';
+import { FloatingSearch } from './components/FloatingSearch';
 import './App.css';
 
 // Shared/official content (built-in + anything admins create) can only ever
@@ -438,6 +439,8 @@ export default function App() {
           }}
         />
       )}
+
+      <FloatingSearch categories={categories} onOpenCategory={setActiveCategoryId} />
     </div>
   );
 }

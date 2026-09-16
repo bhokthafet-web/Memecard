@@ -1,0 +1,102 @@
+.floating-search-btn {
+  --pop-shadow: var(--color-primary-dark);
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #fff;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-glow);
+}
+
+.search-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 16, 45, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px;
+  z-index: 65;
+  animation: overlay-in 0.15s ease;
+}
+
+.search-panel {
+  width: 100%;
+  max-width: 420px;
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  gap: 10px;
+  box-shadow: var(--shadow-lg);
+  animation: modal-pop-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.search-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(109, 90, 239, 0.18);
+  border-radius: var(--radius-full);
+  padding: 8px 8px 8px 14px;
+  flex-shrink: 0;
+}
+
+.search-input-icon {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  outline: none;
+  font: inherit;
+  font-size: 0.92rem;
+  color: var(--color-text);
+}
+
+.search-close-btn {
+  --pop-shadow: rgba(255, 255, 255, 0.5);
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.75);
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.search-hint {
+  margin: 12px 4px;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
